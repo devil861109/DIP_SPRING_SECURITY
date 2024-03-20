@@ -17,7 +17,7 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .authorizeHttpRequests((authz) -> authz
+                .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers("/css/**", "/favicon.ico", "/**", "/index").permitAll()
                         .requestMatchers("/user").hasAnyRole("USER")
                         .requestMatchers("/admin").hasAnyRole("ADMIN")
@@ -48,8 +48,19 @@ public class SecurityConfiguration {
                         })*/
                         .permitAll())
                 .logout(logout -> logout
+                        .logoutUrl("/doLogout")
                         .logoutSuccessUrl("/")
-                        .invalidateHttpSession(true)); //new
+                        /*.logoutSuccessHandler(new LogoutSuccessHandler() {
+                            @Override
+                            public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
+                                    throws IOException, ServletException {
+                                System.out.println("This user logged out: " + authentication.getName());
+                                response.sendRedirect("/");
+                            }
+                        })*/
+                        .invalidateHttpSession(true))
+        //.csrf(csrf -> csrf.disable())
+        ;
         return http.build();
     }
 
