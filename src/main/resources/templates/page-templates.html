@@ -14,8 +14,13 @@
 			<h1 class="logo">Diplomado Java - UNAM</h1>
 			<ul class="nav-links">
 				<li class="nav-item"><a href="/">Home</a></li>
-				<li class="nav-item"><a href="/user">User</a></li>
-				<li class="nav-item"><a href="/admin">Admin</a></li>
+				<li sec:authorize="hasRole('USER')" class="nav-item"><a href="/user">User</a></li>
+				<li sec:authorize="hasRole('ADMIN')" class="nav-item"><a href="/admin">Admin</a></li>
+				<li sec:authorize="!isAuthenticated()" class="nav-item"><a href="/login">Login</a></li>
+				<li sec:authorize="isAuthenticated()" class="nav-item">
+					<form class="link" th:action="@{/logout}" method="post">
+						<input class="link" type="submit" value="Logout"/>
+					</form></li>
 			</ul>
 		</nav>
 	</div>
