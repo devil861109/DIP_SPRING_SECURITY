@@ -1,4 +1,4 @@
-# DIP_SpringSecurity
+# DIP_SPRING_SECURITY
 Diplomado UNAM - Spring Security
 
 This repository is for an example application built in [Spring Boot 3.2.3]
