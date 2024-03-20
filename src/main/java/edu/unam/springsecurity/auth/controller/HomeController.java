@@ -3,6 +3,7 @@ package edu.unam.springsecurity.auth.controller;
 import edu.unam.springsecurity.system.service.AdminService;
 import edu.unam.springsecurity.system.service.HomeService;
 import edu.unam.springsecurity.system.service.UserService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,19 +27,21 @@ public class HomeController {
 		model.addAttribute("text", homeService.getText());
 		return "index";
 	}
-	
+
 	@GetMapping("/index")
 	public String index() {
 		return "redirect:/";
 	}
-	
+
 	@GetMapping("/user")
+	@PreAuthorize("hasRole('USER')")
 	public String user(Model model) {
 		model.addAttribute("text", userService.getText());
 		return "user";
 	}
-	
+
 	@GetMapping("/admin")
+	@PreAuthorize("hasRole('ADMIN')")
 	public String admin(Model model) {
 		model.addAttribute("text", adminService.getText());
 		return "admin";
