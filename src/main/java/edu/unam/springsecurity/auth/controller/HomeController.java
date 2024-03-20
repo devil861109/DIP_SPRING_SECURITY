@@ -4,31 +4,54 @@ import edu.unam.springsecurity.auth.dto.UserInfoDTO;
 import edu.unam.springsecurity.auth.dto.UserInfoRoleDTO;
 import edu.unam.springsecurity.auth.exception.UserInfoNotFoundException;
 import edu.unam.springsecurity.auth.service.UserInfoService;
+import edu.unam.springsecurity.security.jwt.JWTTokenProvider;
+import edu.unam.springsecurity.security.request.JwtRequest;
+import edu.unam.springsecurity.security.request.LoginUserRequest;
+import edu.unam.springsecurity.security.service.UserDetailsServiceImpl;
 import edu.unam.springsecurity.system.service.AdminService;
 import edu.unam.springsecurity.system.service.HomeService;
 import edu.unam.springsecurity.system.service.UserService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.HashSet;
 import java.util.Set;
 
+@Slf4j
 @Controller
 public class HomeController {
 	private final HomeService homeService;
 	private final UserService userService;
 	private final AdminService adminService;
 	private final UserInfoService userInfoService;
+	private final AuthenticationManager authenticationManager;
+	private final JWTTokenProvider jwtTokenProvider;
+	private final UserDetailsServiceImpl userDetailsService;
 
 	// Controller Injection
-	public HomeController(HomeService homeService, UserService userService, AdminService adminService, UserInfoService userInfoService) {
+	public HomeController(HomeService homeService, UserService userService, AdminService adminService, UserInfoService userInfoService,
+						  AuthenticationManager authenticationManager, JWTTokenProvider jwtTokenProvider, UserDetailsServiceImpl userDetailsService) {
 		this.homeService = homeService;
 		this.userService = userService;
 		this.adminService = adminService;
 		this.userInfoService = userInfoService;
+		this.authenticationManager = authenticationManager;
+		this.jwtTokenProvider = jwtTokenProvider;
+		this.userDetailsService = userDetailsService;
 	}
 
 	@GetMapping("/")
@@ -89,5 +112,42 @@ public class HomeController {
 		user.setUseModifiedBy(1L);
 		userInfoService.save(user);
 		return "register_success";
+	}
+
+	@PostMapping("/token")
+	public String createAuthenticationToken(Model model, HttpSession session,
+											@ModelAttribute LoginUserRequest loginUserRequest, HttpServletResponse res) throws Exception {
+		log.info("LoginUserRequest {}", loginUserRequest);
+		try {
+			UserInfoDTO user = userInfoService.findByUseEmail(loginUserRequest.getUsername());
+			if (user.getUseIdStatus() == 1) {
+				Authentication authentication = authenticate(loginUserRequest.getUsername(),
+						loginUserRequest.getPassword());
+				log.info("authentication {}", authentication);
+				String jwtToken = jwtTokenProvider.generateJwtToken(authentication, user);
+				log.info("jwtToken {}", jwtToken);
+				JwtRequest jwtRequest = new JwtRequest(jwtToken, user.getUseId(), user.getUseEmail(),
+						jwtTokenProvider.getExpiryDuration(), authentication.getAuthorities());
+				log.info("jwtRequest {}", jwtRequest);
+				Cookie cookie = new Cookie("token",jwtToken);
+				cookie.setMaxAge(Integer.MAX_VALUE);
+				res.addCookie(cookie);
+				session.setAttribute("msg","Login OK!");
+			}
+		} catch (UsernameNotFoundException | BadCredentialsException e) {
+			session.setAttribute("msg","Bad Credentials");
+			return "redirect:/login";
+		}
+		return "redirect:/index";
+	}
+
+	private Authentication authenticate(String username, String password) throws Exception {
+		try {
+			return authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+		} catch (DisabledException e) {
+			throw new Exception("USER_DISABLED", e);
+		} catch (BadCredentialsException e) {
+			throw new Exception("INVALID_CREDENTIALS", e);
+		}
 	}
 }

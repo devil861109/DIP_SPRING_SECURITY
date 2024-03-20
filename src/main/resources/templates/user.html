@@ -15,8 +15,9 @@
 		<div class="text">
 			<h2 th:text="${text}"></h2>
 			<div>
-				<p>User: <span sec:authentication="name">NOT FOUND</span></p>
-				<p>Spring Roles: <span sec:authentication="principal.authorities">NOT FOUND</span></p>
+				<p>Principal: <span sec:authentication="principal">NOT FOUND</span></p>
+				<p>Spring Roles: <span sec:authentication="authorities">NOT FOUND</span></p>
+				<p>Credentials: <span sec:authentication="credentials">NOT FOUND</span></p>
 			</div>
 		</div>
 		<div th:replace="~{page-templates :: footer}"></div>

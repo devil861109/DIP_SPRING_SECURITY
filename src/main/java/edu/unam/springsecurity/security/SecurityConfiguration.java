@@ -1,5 +1,8 @@
 package edu.unam.springsecurity.security;
 
+import edu.unam.springsecurity.security.jwt.JWTAuthenticationFilter;
+import edu.unam.springsecurity.security.jwt.JWTTokenProvider;
+import edu.unam.springsecurity.security.logout.CustomLogoutSuccessHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,10 +14,13 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.security.SecureRandom;
 
@@ -23,6 +29,10 @@ import java.security.SecureRandom;
 public class SecurityConfiguration {
     @Autowired
     private UserDetailsService uds;
+    @Autowired
+    private JWTTokenProvider tokenProvider;
+    @Autowired
+    private CustomLogoutSuccessHandler customLogoutSuccessHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -31,6 +41,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/css/**", "/favicon.ico", "/**", "/index").permitAll()
                         .requestMatchers("/user").hasAnyRole("USER")
                         .requestMatchers("/admin").hasAnyRole("ADMIN")
+                        .requestMatchers("/api/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(login -> login
@@ -40,12 +51,16 @@ public class SecurityConfiguration {
                         .permitAll())
                 .logout(logout -> logout
                         .logoutUrl("/doLogout")
-                        .logoutSuccessUrl("/")
+                        .logoutSuccessUrl("/index")
                         .deleteCookies("JSESSIONID") //NEW Cookies to clear
+                        .logoutSuccessHandler(customLogoutSuccessHandler)
+                        .clearAuthentication(true)
                         .invalidateHttpSession(true))
-                .csrf(Customizer.withDefaults())
+                .addFilterAfter(new JWTAuthenticationFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
+                .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
-        //.authenticationProvider(authenticationProvider())
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         ;
         return http.build();
     }
@@ -66,6 +81,7 @@ public class SecurityConfiguration {
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
             throws Exception {
+        //your AuthenticationProvider must return UserDetails object
         return new ProviderManager(authenticationProvider());
     }
 }
