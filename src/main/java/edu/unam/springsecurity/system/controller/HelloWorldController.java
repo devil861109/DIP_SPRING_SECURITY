@@ -1,4 +1,4 @@
-package edu.unam.springsecurity.controller;
+package edu.unam.springsecurity.system.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

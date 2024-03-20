@@ -1,4 +1,4 @@
-package edu.unam.springsecurity.service;
+package edu.unam.springsecurity.system.service;
 
 import org.springframework.stereotype.Service;
 

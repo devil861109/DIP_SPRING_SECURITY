@@ -1,8 +1,8 @@
-package edu.unam.springsecurity.controller;
+package edu.unam.springsecurity.auth.controller;
 
-import edu.unam.springsecurity.service.AdminService;
-import edu.unam.springsecurity.service.HomeService;
-import edu.unam.springsecurity.service.UserService;
+import edu.unam.springsecurity.system.service.AdminService;
+import edu.unam.springsecurity.system.service.HomeService;
+import edu.unam.springsecurity.system.service.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,7 +26,7 @@ public class HomeController {
 		model.addAttribute("text", homeService.getText());
 		return "index";
 	}
-
+	
 	@GetMapping("/index")
 	public String index() {
 		return "redirect:/";
