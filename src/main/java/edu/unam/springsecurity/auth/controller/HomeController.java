@@ -1,5 +1,9 @@
 package edu.unam.springsecurity.auth.controller;
 
+import edu.unam.springsecurity.auth.dto.UserInfoDTO;
+import edu.unam.springsecurity.auth.dto.UserInfoRoleDTO;
+import edu.unam.springsecurity.auth.exception.UserInfoNotFoundException;
+import edu.unam.springsecurity.auth.service.UserInfoService;
 import edu.unam.springsecurity.system.service.AdminService;
 import edu.unam.springsecurity.system.service.HomeService;
 import edu.unam.springsecurity.system.service.UserService;
@@ -9,17 +13,22 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Controller
 public class HomeController {
 	private final HomeService homeService;
 	private final UserService userService;
 	private final AdminService adminService;
+	private final UserInfoService userInfoService;
 
 	// Controller Injection
-	public HomeController(HomeService homeService, UserService userService, AdminService adminService) {
+	public HomeController(HomeService homeService, UserService userService, AdminService adminService, UserInfoService userInfoService) {
 		this.homeService = homeService;
 		this.userService = userService;
 		this.adminService = adminService;
+		this.userInfoService = userInfoService;
 	}
 
 	@GetMapping("/")
@@ -62,5 +71,23 @@ public class HomeController {
 	public String loginFailureHandler() {
 		System.out.println("Login failure handler....");
 		return "login";
+	}
+
+	@GetMapping("/register")
+	public String showRegistrationForm(Model model) {
+		model.addAttribute("user", new UserInfoDTO());
+		return "signup_form";
+	}
+
+	@PostMapping("/process_register")
+	public String processRegister(UserInfoDTO user) throws UserInfoNotFoundException {
+		user.setUseIdStatus(1);
+		Set<UserInfoRoleDTO> roles = new HashSet<>();
+		roles.add(UserInfoRoleDTO.builder().usrId(1L).build());
+		user.setUseInfoRoles(roles);
+		user.setUseCreatedBy(1L);
+		user.setUseModifiedBy(1L);
+		userInfoService.save(user);
+		return "register_success";
 	}
 }
