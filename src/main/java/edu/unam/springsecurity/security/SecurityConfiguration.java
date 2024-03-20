@@ -2,7 +2,7 @@ package edu.unam.springsecurity.security;
 
 import edu.unam.springsecurity.security.jwt.JWTAuthenticationFilter;
 import edu.unam.springsecurity.security.jwt.JWTTokenProvider;
-import edu.unam.springsecurity.security.logout.CustomLogoutSuccessHandler;
+import edu.unam.springsecurity.security.jwt.JWTUsernameAndPasswordAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,7 +20,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.security.SecureRandom;
 
@@ -31,32 +30,19 @@ public class SecurityConfiguration {
     private UserDetailsService uds;
     @Autowired
     private JWTTokenProvider tokenProvider;
-    @Autowired
-    private CustomLogoutSuccessHandler customLogoutSuccessHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .authorizeHttpRequests((authorize) -> authorize
-                        .requestMatchers("/css/**", "/favicon.ico", "/**", "/index").permitAll()
+                .authorizeHttpRequests((authz) -> authz
                         .requestMatchers("/user").hasAnyRole("USER")
                         .requestMatchers("/admin").hasAnyRole("ADMIN")
                         .requestMatchers("/api/**").permitAll()
+                        .requestMatchers("/v1/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .formLogin(login -> login
-                        .loginPage("/login")
-                        .defaultSuccessUrl("/")
-                        .successForwardUrl("/login_success_handler")
-                        .permitAll())
-                .logout(logout -> logout
-                        .logoutUrl("/doLogout")
-                        .logoutSuccessUrl("/index")
-                        .deleteCookies("JSESSIONID") //NEW Cookies to clear
-                        .logoutSuccessHandler(customLogoutSuccessHandler)
-                        .clearAuthentication(true)
-                        .invalidateHttpSession(true))
-                .addFilterAfter(new JWTAuthenticationFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
+                .addFilter(new JWTUsernameAndPasswordAuthenticationFilter())
+                .addFilterAfter(new JWTAuthenticationFilter(tokenProvider),JWTUsernameAndPasswordAuthenticationFilter.class)
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session
