@@ -11,7 +11,7 @@
 	<groupId>edu.unam</groupId>
 	<artifactId>DIP_SPRING_SECURITY</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>spring-security-thymeleaf-integration2</name>
+	<name>spring-security-personalized-login</name>
 	<description>UNAM - Spring Security</description>
 	<properties>
 		<java.version>17</java.version>

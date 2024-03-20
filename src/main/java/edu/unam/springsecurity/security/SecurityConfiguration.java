@@ -23,12 +23,33 @@ public class SecurityConfiguration {
                         .requestMatchers("/admin").hasAnyRole("ADMIN")
                         .anyRequest().authenticated()
                 )
-                //.formLogin(Customizer.withDefaults());
                 .formLogin(login -> login
+                        .loginPage("/login") //new
+                        //.usernameParameter("email")
+                        //.passwordParameter("pass")
+                        //.loginProcessingUrl("/doLogin")
                         .defaultSuccessUrl("/")
+                        .successForwardUrl("/login_success_handler")
+                        //.failureForwardUrl("/login_failure_handler")
+                        /*.successHandler(new AuthenticationSuccessHandler() {
+                            @Override
+                            public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+                                System.out.println("Logged user: " + authentication.getName());
+                                response.sendRedirect("/");
+                            }
+                        })
+                        .failureHandler(new AuthenticationFailureHandler() {
+                            @Override
+                            public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
+                                System.out.println("Login failed");
+                                System.out.println(exception);
+                                response.sendRedirect("/login");
+                            }
+                        })*/
                         .permitAll())
                 .logout(logout -> logout
-                        .logoutSuccessUrl("/"));
+                        .logoutSuccessUrl("/")
+                        .invalidateHttpSession(true)); //new
         return http.build();
     }
 

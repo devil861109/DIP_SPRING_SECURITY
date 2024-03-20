@@ -6,6 +6,7 @@ import edu.unam.springsecurity.service.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 
 @Controller
 public class HomeController {
@@ -25,7 +26,7 @@ public class HomeController {
 		model.addAttribute("text", homeService.getText());
 		return "index";
 	}
-	
+
 	@GetMapping("/index")
 	public String index() {
 		return "redirect:/";
@@ -41,5 +42,22 @@ public class HomeController {
 	public String admin(Model model) {
 		model.addAttribute("text", adminService.getText());
 		return "admin";
+	}
+
+	@GetMapping("/login")
+	public String login() {
+		return "login";
+	}
+
+	@PostMapping("/login_success_handler")
+	public String loginSuccessHandler() {
+		System.out.println("Logging user login success...");
+		return "index";
+	}
+
+	@PostMapping("/login_failure_handler")
+	public String loginFailureHandler() {
+		System.out.println("Login failure handler....");
+		return "login";
 	}
 }
