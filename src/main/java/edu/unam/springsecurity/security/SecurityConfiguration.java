@@ -30,8 +30,8 @@ public class SecurityConfiguration {
         http
                 .authorizeHttpRequests((authz) -> authz
                         .requestMatchers("/css/**", "/favicon.ico", "/**", "/index").permitAll()
-                        .requestMatchers("/user").hasAnyRole("USER")
-                        .requestMatchers("/admin").hasAnyRole("ADMIN")
+                        .requestMatchers("/user").hasAnyAuthority("USER")
+                        .requestMatchers("/admin").hasAnyAuthority("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .formLogin(login -> login
