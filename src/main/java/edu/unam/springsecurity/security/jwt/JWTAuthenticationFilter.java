@@ -33,17 +33,9 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain)
             throws ServletException, IOException {
-        String jwt = "";
-        if(request.getCookies() != null)
-            for(Cookie cookie: request.getCookies())
-                if(cookie.getName().equals("token"))
-                    jwt = cookie.getValue();
-        if(jwt == null || jwt.equals("")){
-            filterChain.doFilter(request, response);
-            return;
-        }
         try {
-            if (tokenProvider.validateJwtToken(jwt)) {
+            String jwt = getJwt(request);
+            if (jwt != null && tokenProvider.validateJwtToken(jwt)) {
                 Claims body = tokenProvider.getClaims(jwt);
                 var authorities = (List<Map<String, String>>) body.get("auth");
                 Set<SimpleGrantedAuthority> simpleGrantedAuthorities = authorities.stream()
@@ -65,5 +57,13 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
             log.error("Can NOT set user authentication -> Message: {}", exception.getMessage());
         }
         filterChain.doFilter(request, response);
+    }
+
+    private String getJwt(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.replace("Bearer ", "");
+        }
+        return null;
     }
 }
