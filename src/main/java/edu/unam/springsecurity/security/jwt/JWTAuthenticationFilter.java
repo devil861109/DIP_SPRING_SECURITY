@@ -45,8 +45,8 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
                 Set<SimpleGrantedAuthority> simpleGrantedAuthorities = authorities.stream()
                         .map(m -> new SimpleGrantedAuthority(m.get("authority")))
                         .collect(Collectors.toSet());
-                //String username = tokenProvider.getIssuer(jwt);
-                String username = tokenProvider.getFullName(jwt);
+                String username = tokenProvider.getIssuer(jwt);
+                //String username = tokenProvider.getFullName(jwt);
                 CredentialsDTO credentials = CredentialsDTO.builder()
                         .sub(tokenProvider.getSubject(jwt)).aud(tokenProvider.getAudience(jwt))
                         .exp(tokenProvider.getTokenExpiryFromJWT(jwt).getTime())

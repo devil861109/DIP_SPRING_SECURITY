@@ -4,6 +4,7 @@ import edu.unam.springsecurity.auth.dto.UserInfoDTO;
 import edu.unam.springsecurity.auth.service.UserInfoService;
 import edu.unam.springsecurity.security.exception.ExceptionResponse;
 import edu.unam.springsecurity.security.jwt.JWTTokenProvider;
+import edu.unam.springsecurity.security.model.UserDetailsImpl;
 import edu.unam.springsecurity.security.request.JwtRequest;
 import edu.unam.springsecurity.security.request.LoginUserRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -27,13 +28,11 @@ import java.time.LocalDateTime;
 @CrossOrigin("*")
 public class AuthController {
     private final AuthenticationManager authenticationManager;
-    private final UserInfoService userInfoService;
     private final JWTTokenProvider jwtTokenProvider;
 
     @Autowired
-    public AuthController(AuthenticationManager authenticationManager, UserInfoService userInfoService, JWTTokenProvider jwtTokenProvider) {
+    public AuthController(AuthenticationManager authenticationManager, JWTTokenProvider jwtTokenProvider) {
         this.authenticationManager = authenticationManager;
-        this.userInfoService = userInfoService;
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
@@ -47,23 +46,15 @@ public class AuthController {
                     .errorMessage(bindingResult.toString())
                     .timestamp(LocalDateTime.now())
                     .build(), HttpStatus.BAD_REQUEST);
-        UserInfoDTO user = userInfoService.findByUseEmail(authenticationRequest.getUsername());
-        if (user.getUseIdStatus() == 1) {
-            Authentication authentication = authenticate(authenticationRequest.getUsername(),
-                    authenticationRequest.getPassword());
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            log.info("authentication {}", authentication);
-            String jwtToken = jwtTokenProvider.generateJwtToken(authentication, user);
-            JwtRequest jwtRequest = new JwtRequest(jwtToken, user.getUseId(), user.getUseEmail(),
-                    jwtTokenProvider.getExpiryDuration(), authentication.getAuthorities());
-            return new ResponseEntity<>(jwtRequest, HttpStatus.OK);
-        }
-        return new ResponseEntity<>(ExceptionResponse.builder()
-                .errorStatus(HttpStatus.BAD_REQUEST)
-                .errorCode(HttpStatus.BAD_REQUEST.value())
-                .errorMessage("User has been deactivated/locked !!")
-                .timestamp(LocalDateTime.now())
-                .build(), HttpStatus.BAD_REQUEST);
+
+        Authentication authentication = authenticate(authenticationRequest.getUsername(),
+                authenticationRequest.getPassword());
+        log.info("authentication {}", authentication);
+        UserDetailsImpl usuario = (UserDetailsImpl) authentication.getPrincipal();
+        String jwtToken = jwtTokenProvider.generateJwtToken(usuario);
+        JwtRequest jwtRequest = new JwtRequest(jwtToken, usuario.getId(), usuario.getEmail(),
+                jwtTokenProvider.getExpiryDuration(), authentication.getAuthorities());
+        return new ResponseEntity<>(jwtRequest, HttpStatus.OK);
     }
 
     private Authentication authenticate(String username, String password) throws Exception {

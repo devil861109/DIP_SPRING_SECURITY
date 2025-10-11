@@ -12,6 +12,7 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -35,7 +36,7 @@ public class SecurityConfiguration {
     private JWTTokenProvider tokenProvider;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager) throws Exception {
         //se declara, se manda a llamar aqui o se inyecta
         JWTAuthenticationFilter jwtFilter = new JWTAuthenticationFilter(tokenProvider, uds);
         http
@@ -46,7 +47,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/v1/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .addFilter(new JWTUsernameAndPasswordAuthenticationFilter())
+                .addFilter(new JWTUsernameAndPasswordAuthenticationFilter(authenticationManager, tokenProvider))
                 .addFilterAfter(jwtFilter, JWTUsernameAndPasswordAuthenticationFilter.class)
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
