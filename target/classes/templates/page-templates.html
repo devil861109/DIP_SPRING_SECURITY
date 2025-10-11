@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="https://www.thymeleaf.org" lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>Spring Boot UNAM</title>
+<link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+	<div th:fragment="navbar">
+		<nav class="navbar">
+			<h1 class="logo">Diplomado Java - UNAM</h1>
+			<ul class="nav-links">
+				<li class="nav-item"><a href="/">Home</a></li>
+				<li sec:authorize="hasAuthority('USER')" class="nav-item"><a href="/user">User</a></li>
+				<li sec:authorize="hasAuthority('ADMIN')" class="nav-item"><a href="/admin">Admin</a></li>
+				<li sec:authorize="!isAuthenticated()" class="nav-item"><a href="/login">Login</a></li>
+				<li sec:authorize="!isAuthenticated()" class="nav-item"><a href="/register">Register</a></li>
+				<li sec:authorize="isAuthenticated()" class="nav-item">
+					<form class="link" th:action="@{/doLogout}" method="post">
+						<input class="link" type="submit" value="Logout"/>
+					</form></li>
+			</ul>
+		</nav>
+	</div>
+	<div th:fragment="main-text"></div>
+	<div th:fragment="footer">
+		<p class="center">&#169; Alfonso Rivero - Spring Security</p>
+	</div>
+</body>
+</html>

@@ -1,5 +1,6 @@
 package edu.unam.springsecurity.security;
 
+import edu.unam.springsecurity.security.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,8 +22,10 @@ import java.security.SecureRandom;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
+    //OJO
     @Autowired
-    private UserDetailsService uds;
+    //private UserDetailsService uds;
+    private UserDetailsServiceImpl uds;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
