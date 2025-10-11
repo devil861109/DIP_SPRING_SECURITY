@@ -3,6 +3,7 @@ package edu.unam.springsecurity.security;
 import edu.unam.springsecurity.security.jwt.JWTAuthenticationFilter;
 import edu.unam.springsecurity.security.jwt.JWTTokenProvider;
 import edu.unam.springsecurity.security.jwt.JWTUsernameAndPasswordAuthenticationFilter;
+import edu.unam.springsecurity.security.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,13 +27,17 @@ import java.security.SecureRandom;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
+    //OJO
     @Autowired
-    private UserDetailsService uds;
+    //private UserDetailsService uds;
+    private UserDetailsServiceImpl uds;
     @Autowired
     private JWTTokenProvider tokenProvider;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        //se declara, se manda a llamar aqui o se inyecta
+        JWTAuthenticationFilter jwtFilter = new JWTAuthenticationFilter(tokenProvider, uds);
         http
                 .authorizeHttpRequests((authz) -> authz
                         .requestMatchers("/user").hasAnyRole("USER")
@@ -42,7 +47,7 @@ public class SecurityConfiguration {
                         .anyRequest().authenticated()
                 )
                 .addFilter(new JWTUsernameAndPasswordAuthenticationFilter())
-                .addFilterAfter(new JWTAuthenticationFilter(tokenProvider),JWTUsernameAndPasswordAuthenticationFilter.class)
+                .addFilterAfter(jwtFilter, JWTUsernameAndPasswordAuthenticationFilter.class)
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session
