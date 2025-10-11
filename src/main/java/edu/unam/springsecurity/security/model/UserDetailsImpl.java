@@ -114,4 +114,8 @@ public class UserDetailsImpl implements UserDetails {
         return true;
     }
 
+    public Long getId() {
+        return userInfo.getUseId();
+    }
+
 }

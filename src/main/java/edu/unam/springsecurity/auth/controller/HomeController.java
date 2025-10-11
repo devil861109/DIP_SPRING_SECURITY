@@ -5,6 +5,7 @@ import edu.unam.springsecurity.auth.dto.UserInfoRoleDTO;
 import edu.unam.springsecurity.auth.exception.UserInfoNotFoundException;
 import edu.unam.springsecurity.auth.service.UserInfoService;
 import edu.unam.springsecurity.security.jwt.JWTTokenProvider;
+import edu.unam.springsecurity.security.model.UserDetailsImpl;
 import edu.unam.springsecurity.security.request.JwtRequest;
 import edu.unam.springsecurity.security.request.LoginUserRequest;
 import edu.unam.springsecurity.security.service.UserDetailsServiceImpl;
@@ -117,26 +118,25 @@ public class HomeController {
 											@ModelAttribute LoginUserRequest loginUserRequest, HttpServletResponse res) throws Exception {
 		log.info("LoginUserRequest {}", loginUserRequest);
 		try {
-			UserInfoDTO user = userInfoService.findByUseEmail(loginUserRequest.getUsername());
-			if (user.getUseIdStatus() == 1) {
-				Authentication authentication = authenticate(loginUserRequest.getUsername(),
-						loginUserRequest.getPassword());
-				log.info("authentication {}", authentication);
-				String jwtToken = jwtTokenProvider.generateJwtToken(authentication, user);
-				log.info("jwtToken {}", jwtToken);
-				JwtRequest jwtRequest = new JwtRequest(jwtToken, user.getUseId(), user.getUseEmail(),
-						jwtTokenProvider.getExpiryDuration(), authentication.getAuthorities());
-				log.info("jwtRequest {}", jwtRequest);
-				Cookie cookie = new Cookie("token",jwtToken);
-				cookie.setMaxAge(Integer.MAX_VALUE);
-				//cookie.setMaxAge(3600);//1 hora
-				//cookie.setMaxAge(-1);//Se elimina automáticamente al cerrar el navegador
-                //cookie.setSecure(true); // La cookie solo se envía por conexiones HTTPS. Protege contra sniffing y MITM (Man-in-the-Middle) certificado SSL
-                cookie.setHttpOnly(true); //Impide que JavaScript acceda a la cookie (XSS)
-                cookie.setAttribute("SameSite", "Strict"); // si usas Servlet 4.0+ o frameworks que lo soporten. Protege contra CSRF
-                res.addCookie(cookie);
-				session.setAttribute("msg","Login OK!");
-			}
+            Authentication authentication = authenticate(loginUserRequest.getUsername(),
+                    loginUserRequest.getPassword());
+            log.info("authentication {}", authentication);
+            UserDetailsImpl usuario = (UserDetailsImpl) authentication.getPrincipal();
+            String jwtToken = jwtTokenProvider.generateJwtToken(usuario);
+            //String jwtToken = jwtTokenProvider.generateJwtToken(authentication, user);
+            log.info("jwtToken {}", jwtToken);
+            JwtRequest jwtRequest = new JwtRequest(jwtToken, usuario.getId(), usuario.getEmail(),
+                    jwtTokenProvider.getExpiryDuration(), authentication.getAuthorities());
+            log.info("jwtRequest {}", jwtRequest);
+            Cookie cookie = new Cookie("token",jwtToken);
+            cookie.setMaxAge(Integer.MAX_VALUE);
+            //cookie.setMaxAge(3600);//1 hora
+            //cookie.setMaxAge(-1);//Se elimina automáticamente al cerrar el navegador
+            //cookie.setSecure(true); // La cookie solo se envía por conexiones HTTPS. Protege contra sniffing y MITM (Man-in-the-Middle) certificado SSL
+            cookie.setHttpOnly(true); //Impide que JavaScript acceda a la cookie (XSS)
+            cookie.setAttribute("SameSite", "Strict"); // si usas Servlet 4.0+ o frameworks que lo soporten. Protege contra CSRF
+            res.addCookie(cookie);
+            session.setAttribute("msg","Login OK!");
 		} catch (UsernameNotFoundException | BadCredentialsException e) {
 			session.setAttribute("msg","Bad Credentials");
 			return "redirect:/login";

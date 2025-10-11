@@ -4,7 +4,6 @@ import edu.unam.springsecurity.auth.model.UserInfo;
 import edu.unam.springsecurity.auth.repository.UserInfoRepository;
 import edu.unam.springsecurity.security.model.UserDetailsImpl;
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -20,7 +19,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Slf4j
 @Component
 @AllArgsConstructor
 public class AuthenticationProviderImpl implements AuthenticationProvider {
@@ -30,7 +28,6 @@ public class AuthenticationProviderImpl implements AuthenticationProvider {
 
     @Override
     public Authentication authenticate(Authentication authentication) {
-        log.info("Va");
         String username = authentication.getName();
         String pwd = authentication.getCredentials().toString();
 
