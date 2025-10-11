@@ -40,18 +40,16 @@ public class HomeController {
 	private final UserInfoService userInfoService;
 	private final AuthenticationManager authenticationManager;
 	private final JWTTokenProvider jwtTokenProvider;
-	private final UserDetailsServiceImpl userDetailsService;
 
 	// Controller Injection
 	public HomeController(HomeService homeService, UserService userService, AdminService adminService, UserInfoService userInfoService,
-						  AuthenticationManager authenticationManager, JWTTokenProvider jwtTokenProvider, UserDetailsServiceImpl userDetailsService) {
+						  AuthenticationManager authenticationManager, JWTTokenProvider jwtTokenProvider) {
 		this.homeService = homeService;
 		this.userService = userService;
 		this.adminService = adminService;
 		this.userInfoService = userInfoService;
 		this.authenticationManager = authenticationManager;
 		this.jwtTokenProvider = jwtTokenProvider;
-		this.userDetailsService = userDetailsService;
 	}
 
 	@GetMapping("/")
@@ -131,7 +129,12 @@ public class HomeController {
 				log.info("jwtRequest {}", jwtRequest);
 				Cookie cookie = new Cookie("token",jwtToken);
 				cookie.setMaxAge(Integer.MAX_VALUE);
-				res.addCookie(cookie);
+				//cookie.setMaxAge(3600);//1 hora
+				//cookie.setMaxAge(-1);//Se elimina automáticamente al cerrar el navegador
+                //cookie.setSecure(true); // La cookie solo se envía por conexiones HTTPS. Protege contra sniffing y MITM (Man-in-the-Middle) certificado SSL
+                cookie.setHttpOnly(true); //Impide que JavaScript acceda a la cookie (XSS)
+                cookie.setAttribute("SameSite", "Strict"); // si usas Servlet 4.0+ o frameworks que lo soporten. Protege contra CSRF
+                res.addCookie(cookie);
 				session.setAttribute("msg","Login OK!");
 			}
 		} catch (UsernameNotFoundException | BadCredentialsException e) {

@@ -39,6 +39,8 @@ public class SecurityConfiguration {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        //se declara, se manda a llamar aqui o se inyecta
+        JWTAuthenticationFilter jwtFilter = new JWTAuthenticationFilter(tokenProvider, uds);
         http
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers("/css/**", "/favicon.ico", "/**", "/index").permitAll()
@@ -59,7 +61,7 @@ public class SecurityConfiguration {
                         .logoutSuccessHandler(customLogoutSuccessHandler)
                         .clearAuthentication(true)
                         .invalidateHttpSession(true))
-                .addFilterAfter(new JWTAuthenticationFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session

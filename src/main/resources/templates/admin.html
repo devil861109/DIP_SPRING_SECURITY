@@ -15,7 +15,7 @@
 		<div class="text">
 			<h2 th:text="${text}"></h2>
 			<div>
-				<p>Principal: <span sec:authentication="principal">NOT FOUND</span></p>
+				<p>Principal: <span sec:authentication="principal.username">NOT FOUND</span></p>
 				<p>Spring Roles: <span sec:authentication="authorities">NOT FOUND</span></p>
 				<p>Credentials: <span sec:authentication="credentials">NOT FOUND</span></p>
 			</div>
