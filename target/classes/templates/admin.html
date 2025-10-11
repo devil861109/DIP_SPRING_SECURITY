@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="https://www.thymeleaf.org" lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>Spring Boot UNAM</title>
+<link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+	<div th:replace="~{page-templates :: navbar}"></div>
+	<div class="main">
+		<div th:replace="~{page-templates :: main-text}"></div>
+		<div class="text">
+			<h2 th:text="${text}"></h2>
+			<div>
+				<p>Principal: <span sec:authentication="principal">NOT FOUND</span></p>
+				<p>Spring Roles: <span sec:authentication="authorities">NOT FOUND</span></p>
+				<p>Credentials: <span sec:authentication="credentials">NOT FOUND</span></p>
+			</div>
+		</div>
+		<div th:replace="~{page-templates :: footer}"></div>
+	</div>
+</body>
+</html>

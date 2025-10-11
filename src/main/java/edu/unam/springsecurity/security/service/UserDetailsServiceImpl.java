@@ -2,6 +2,7 @@ package edu.unam.springsecurity.security.service;
 
 import edu.unam.springsecurity.auth.model.UserInfo;
 import edu.unam.springsecurity.auth.repository.UserInfoRepository;
+import edu.unam.springsecurity.security.model.UserDetailsImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -32,9 +33,13 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         UserInfo userInfo = Optional.ofNullable(userInfoRepository.findByUseEmail(username))
                 .orElseThrow(() -> new UsernameNotFoundException("User not found in database"));
         String userName = userInfo.getUseEmail();
-        String password = userInfo.getUsePasswd();
+        String password = userInfo.getUsePasswd();//Bcrypt, Scrypt
         List<GrantedAuthority> authorities = userInfo.getUseInfoRoles().stream().map(role ->
                 new SimpleGrantedAuthority(role.getUsrRoleName())).collect(Collectors.toList());
-        return new User(userName, password, authorities);
+        //return new User();
+        //ELIJO, si me voy por mi implementacion de UserDetailsImpl o por la de Spring Security (USER)
+        //return new User(userName, password, authorities);
+        return UserDetailsImpl.build(userInfo);
+        //return UserDetailsImpl.build2(userInfo);
     }
 }

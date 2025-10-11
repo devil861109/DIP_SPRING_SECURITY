@@ -3,6 +3,7 @@ package edu.unam.springsecurity.security;
 import edu.unam.springsecurity.security.jwt.JWTAuthenticationFilter;
 import edu.unam.springsecurity.security.jwt.JWTTokenProvider;
 import edu.unam.springsecurity.security.logout.CustomLogoutSuccessHandler;
+import edu.unam.springsecurity.security.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,8 +28,10 @@ import java.security.SecureRandom;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
+    //OJO
     @Autowired
-    private UserDetailsService uds;
+    //private UserDetailsService uds;
+    private UserDetailsServiceImpl uds;
     @Autowired
     private JWTTokenProvider tokenProvider;
     @Autowired
