@@ -29,7 +29,7 @@ public class SecurityConfiguration {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests((authz) -> authz
-                        .requestMatchers("/css/**", "/favicon.ico", "/**", "/index").permitAll()
+                        .requestMatchers("/css/**", "/favicon.ico", "/**", "/index", "/build/**", "/images/**", "/vendors/**").permitAll()
                         .requestMatchers("/user").hasAnyAuthority("USER")
                         .requestMatchers("/admin").hasAnyAuthority("ADMIN")
                         .anyRequest().authenticated()
