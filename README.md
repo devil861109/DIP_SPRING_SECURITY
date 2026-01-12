@@ -1,7 +1,7 @@
 # DIP_SPRING_SECURITY
 Diplomado UNAM - Spring Security
 
-This repository is for an example application built in [Spring Boot 3.2.3]
+This repository is for an example application built in [Spring Boot 3.5.9]
 
 The application is a simple Spring Boot 3. It is used to help students learn how
 to use the Spring Framework with Spring Security Framework. 
