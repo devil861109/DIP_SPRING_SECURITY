@@ -43,7 +43,7 @@ public class SecurityConfiguration {
         JWTAuthenticationFilter jwtFilter = new JWTAuthenticationFilter(tokenProvider, uds);
         http
                 .authorizeHttpRequests((authorize) -> authorize
-                        .requestMatchers("/css/**", "/favicon.ico", "/**", "/index").permitAll()
+                        .requestMatchers("/css/**", "/favicon.ico", "/**", "/index", "/build/**", "/images/**", "/vendors/**").permitAll()
                         .requestMatchers("/user").hasAnyRole("USER")
                         .requestMatchers("/admin").hasAnyRole("ADMIN")
                         .requestMatchers("/api/**").permitAll()
