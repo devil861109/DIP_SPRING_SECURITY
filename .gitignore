@@ -219,7 +219,6 @@ Temporary Items
 **/nbproject/Makefile-*.mk
 **/nbproject/Package-*.bash
 nbbuild/
-dist/
 nbdist/
 .nb-gradle/
 
