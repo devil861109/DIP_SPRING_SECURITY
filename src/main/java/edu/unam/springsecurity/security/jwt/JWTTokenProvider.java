@@ -1,19 +1,14 @@
 package edu.unam.springsecurity.security.jwt;
 
-import edu.unam.springsecurity.auth.dto.UserInfoDTO;
 import edu.unam.springsecurity.security.model.UserDetailsImpl;
-import edu.unam.springsecurity.security.service.UserDetailsServiceImpl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
-import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -33,68 +28,101 @@ public class JWTTokenProvider {
     }
 
     public String generateJwtToken(UserDetailsImpl user) {
-        Claims claims = Jwts.claims()
-                .setSubject("UNAM")
-                .setIssuer(user.getUsername())
-                .setAudience("JAVA");
-        claims.put("principal", user);
-        claims.put("auth", user.getAuthorities());
-        claims.put("issid", user.getId());
-        claims.put("issname", user.getName());
         key = Keys.hmacShaKeyFor(secret.getBytes());
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + jwtExpirationInMs * 1000L);
+
         return Jwts.builder()
-                .setClaims(claims)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationInMs * 1000L))
-                .signWith(key, SignatureAlgorithm.HS512)
+                .subject("UNAM")
+                .issuer(user.getUsername())
+                .audience().add("JAVA").and()
+                .claim("principal", user)
+                .claim("auth", user.getAuthorities())
+                .claim("issid", user.getId())
+                .claim("issname", user.getName())
+                .issuedAt(now)
+                .expiration(expiryDate)
+                .signWith(key)
                 .compact();
     }
 
     public Claims getClaims(String token) {
         key = Keys.hmacShaKeyFor(secret.getBytes());
-        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+        return Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     public String getFullName(String token) {
         key = Keys.hmacShaKeyFor(secret.getBytes());
-        var body = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+        var body = Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
         return (String) body.get("issname");
     }
 
     public String getSubject(String token) {
         key = Keys.hmacShaKeyFor(secret.getBytes());
-        Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+        Claims claims = Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
         return claims.getSubject();
     }
 
     public String getIssuer(String token) {
         key = Keys.hmacShaKeyFor(secret.getBytes());
-        Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+        Claims claims = Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
         return claims.getIssuer();
     }
 
     public String getAudience(String token) {
         key = Keys.hmacShaKeyFor(secret.getBytes());
-        Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
-        return claims.getAudience();
+        Claims claims = Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+        var audience = claims.getAudience();
+        return audience != null && !audience.isEmpty() ? audience.iterator().next() : null;
     }
 
     public Date getTokenExpiryFromJWT(String token) {
         key = Keys.hmacShaKeyFor(secret.getBytes());
-        Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+        Claims claims = Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
         return claims.getExpiration();
     }
 
     public Date getTokenIatFromJWT(String token) {
         key = Keys.hmacShaKeyFor(secret.getBytes());
-        Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+        Claims claims = Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
         return claims.getIssuedAt();
     }
 
     public boolean validateJwtToken(String authToken) {
         try {
             key = Keys.hmacShaKeyFor(secret.getBytes());
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(authToken);
+            Jwts.parser()
+                    .verifyWith(key)
+                    .build()
+                    .parseSignedClaims(authToken);
             return true;
         } catch (MalformedJwtException exception) {
             log.error("Invalid JWT token -> Message: {}", exception.getMessage());
