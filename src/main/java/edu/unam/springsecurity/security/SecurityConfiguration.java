@@ -44,7 +44,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/user").hasAnyRole("USER")
                         .requestMatchers("/admin").hasAnyRole("ADMIN")
                         .requestMatchers("/api/**").permitAll()
-                        .requestMatchers("/v1/**").permitAll()
+                        .requestMatchers("/v1/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilter(new JWTUsernameAndPasswordAuthenticationFilter(authenticationManager, tokenProvider))
