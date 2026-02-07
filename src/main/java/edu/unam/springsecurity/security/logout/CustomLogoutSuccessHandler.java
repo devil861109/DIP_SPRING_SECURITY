@@ -19,13 +19,16 @@ public class CustomLogoutSuccessHandler implements LogoutSuccessHandler {
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         log.info("Logout Handler");
         Cookie[] cookies2 = request.getCookies();
-        for (Cookie cookie : cookies2) {
-            if (cookie.getName().equals("token")) {
-                cookie.setMaxAge(0);
-                response.addCookie(cookie);
-                log.info("Logout successfully");
-                response.sendRedirect(request.getContextPath());
+        if (cookies2 != null) {
+            for (Cookie cookie : cookies2) {
+                if ("token".equals(cookie.getName()) || "refresh_token".equals(cookie.getName())) {
+                    cookie.setMaxAge(0);
+                    response.addCookie(cookie);
+                }
             }
+        }
+        if (!response.isCommitted()) {
+            response.sendRedirect(request.getContextPath());
         }
     }
 }

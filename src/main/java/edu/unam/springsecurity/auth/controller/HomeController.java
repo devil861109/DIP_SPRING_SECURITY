@@ -13,6 +13,7 @@ import edu.unam.springsecurity.system.service.AdminService;
 import edu.unam.springsecurity.system.service.HomeService;
 import edu.unam.springsecurity.system.service.UserService;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
@@ -41,16 +42,19 @@ public class HomeController {
 	private final UserInfoService userInfoService;
 	private final AuthenticationManager authenticationManager;
 	private final JWTTokenProvider jwtTokenProvider;
+	private final UserDetailsServiceImpl userDetailsService;
 
 	// Controller Injection
 	public HomeController(HomeService homeService, UserService userService, AdminService adminService, UserInfoService userInfoService,
-						  AuthenticationManager authenticationManager, JWTTokenProvider jwtTokenProvider) {
+						  AuthenticationManager authenticationManager, JWTTokenProvider jwtTokenProvider,
+						  UserDetailsServiceImpl userDetailsService) {
 		this.homeService = homeService;
 		this.userService = userService;
 		this.adminService = adminService;
 		this.userInfoService = userInfoService;
 		this.authenticationManager = authenticationManager;
 		this.jwtTokenProvider = jwtTokenProvider;
+		this.userDetailsService = userDetailsService;
 	}
 
 	@GetMapping("/")
@@ -123,19 +127,13 @@ public class HomeController {
             log.info("authentication {}", authentication);
             UserDetailsImpl usuario = (UserDetailsImpl) authentication.getPrincipal();
             String jwtToken = jwtTokenProvider.generateJwtToken(usuario);
-            //String jwtToken = jwtTokenProvider.generateJwtToken(authentication, user);
+            String refreshToken = jwtTokenProvider.generateRefreshToken(usuario);
             log.info("jwtToken {}", jwtToken);
             JwtRequest jwtRequest = new JwtRequest(jwtToken, usuario.getId(), usuario.getEmail(),
                     jwtTokenProvider.getExpiryDuration(), authentication.getAuthorities());
             log.info("jwtRequest {}", jwtRequest);
-            Cookie cookie = new Cookie("token",jwtToken);
-            cookie.setMaxAge(Integer.MAX_VALUE);
-            //cookie.setMaxAge(3600);//1 hora
-            //cookie.setMaxAge(-1);//Se elimina automáticamente al cerrar el navegador
-            //cookie.setSecure(true); // La cookie solo se envía por conexiones HTTPS. Protege contra sniffing y MITM (Man-in-the-Middle) certificado SSL
-            cookie.setHttpOnly(true); //Impide que JavaScript acceda a la cookie (XSS)
-            cookie.setAttribute("SameSite", "Strict"); // si usas Servlet 4.0+ o frameworks que lo soporten. Protege contra CSRF
-            res.addCookie(cookie);
+            addCookie(res, "token", jwtToken, Integer.MAX_VALUE);
+            addCookie(res, "refresh_token", refreshToken, (int) (jwtTokenProvider.getRefreshExpiryDuration() / 1000L));
             session.setAttribute("msg","Login OK!");
 		} catch (UsernameNotFoundException | BadCredentialsException e) {
 			session.setAttribute("msg","Bad Credentials");
@@ -143,6 +141,50 @@ public class HomeController {
 		}
 		return "redirect:/index";
 	}
+
+	@PostMapping("/refresh")
+	public String refreshToken(HttpServletRequest request, HttpServletResponse response, HttpSession session) {
+        String refreshToken = getCookieValue(request, "refresh_token");
+        if (refreshToken == null || refreshToken.isBlank()) {
+            session.setAttribute("msg", "Refresh token missing");
+            return "redirect:/login";
+        }
+        if (!jwtTokenProvider.validateRefreshToken(refreshToken)) {
+            session.setAttribute("msg", "Invalid refresh token");
+            return "redirect:/login";
+        }
+
+        String username = jwtTokenProvider.getIssuer(refreshToken);
+        UserDetailsImpl user = (UserDetailsImpl) userDetailsService.loadUserByUsername(username);
+        String newAccessToken = jwtTokenProvider.generateJwtToken(user);
+        String newRefreshToken = jwtTokenProvider.generateRefreshToken(user);
+
+        addCookie(response, "token", newAccessToken, Integer.MAX_VALUE);
+        addCookie(response, "refresh_token", newRefreshToken, (int) (jwtTokenProvider.getRefreshExpiryDuration() / 1000L));
+        session.setAttribute("msg", "Token refreshed");
+        return "redirect:/index";
+    }
+
+    private void addCookie(HttpServletResponse response, String name, String value, int maxAgeSeconds) {
+        Cookie cookie = new Cookie(name, value);
+        cookie.setMaxAge(maxAgeSeconds);
+        //cookie.setSecure(true); // Enable for HTTPS deployments.
+        cookie.setHttpOnly(true);
+        cookie.setAttribute("SameSite", "Strict");
+        response.addCookie(cookie);
+    }
+
+    private String getCookieValue(HttpServletRequest request, String name) {
+        if (request.getCookies() == null) {
+            return null;
+        }
+        for (Cookie cookie : request.getCookies()) {
+            if (name.equals(cookie.getName())) {
+                return cookie.getValue();
+            }
+        }
+        return null;
+    }
 
 	private Authentication authenticate(String username, String password) throws Exception {
 		try {
