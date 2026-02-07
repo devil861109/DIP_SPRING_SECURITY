@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Spring Boot - UNAM</title>
+    <link th:href="@{/vendors/bootstrap/dist/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{/vendors/fontawesome/css/font-awesome.min.css}" rel="stylesheet">
+    <link th:href="@{/vendors/nprogress/nprogress.css}" rel="stylesheet">
+    <link th:href="@{/build/css/custom.min.css}" rel="stylesheet">
+</head>
+<body class="nav-md">
+<div class="container body">
+    <div class="main_container">
+        <div class="col-md-3 left_col">
+            <div class="left_col scroll-view">
+                <div class="navbar nav_title" style="border: 0;">
+                    <a href="index.html" class="site_title"><i class="fa fa-paw"></i> <span>HOME</span></a>
+                </div>
+                <div th:replace="~{page-templates :: menuprofile}"></div>
+                <br />
+                <div th:replace="~{page-templates :: sidebar}"></div>
+                <div th:replace="~{page-templates :: menufooter}"></div>
+            </div>
+        </div>
+
+        <div th:replace="~{page-templates :: topnavigation}"></div>
+
+        <div class="right_col" role="main">
+            <div class="">
+                <div class="page-title">
+                    <div class="title_left">
+                        <h3>PetStore</h3>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+
+                <div class="row">
+                    <div class="col-md-12 col-sm-12">
+                        <div class="x_panel">
+                            <div class="x_title">
+                                <h2>Editar Mascota</h2>
+                                <ul class="nav navbar-right panel_toolbox">
+                                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                                    <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+                                </ul>
+                                <div class="clearfix"></div>
+                            </div>
+                            <div class="x_content">
+                                <form action="/pets/actualizar" method="post" class="form-horizontal form-label-left">
+                                    <input type="hidden" name="id" th:value="${pet.id}">
+
+                                    <div class="form-group row">
+                                        <label class="control-label col-md-3 col-sm-3">Nombre</label>
+                                        <div class="col-md-9 col-sm-9">
+                                            <input type="text" name="name" class="form-control" th:value="${pet.name}" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label class="control-label col-md-3 col-sm-3">Estado</label>
+                                        <div class="col-md-9 col-sm-9">
+                                            <select name="status" class="form-control">
+                                                <option value="available" th:selected="${pet.status=='available'}">Disponible</option>
+                                                <option value="pending" th:selected="${pet.status=='pending'}">Pendiente</option>
+                                                <option value="sold" th:selected="${pet.status=='sold'}">Vendido</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label class="control-label col-md-3 col-sm-3">Foto (URL)</label>
+                                        <div class="col-md-9 col-sm-9">
+                                            <input type="text" name="photoUrls" class="form-control" th:value="${pet.photoUrls[0]}" placeholder="https://ejemplo.com/foto.jpg">
+                                            <div style="margin-top: 10px;" th:if="${pet.photoUrls != null and !pet.photoUrls.isEmpty()}">
+                                                <img th:src="${pet.photoUrls[0]}" alt="foto" class="img-thumbnail" style="max-height: 180px;">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="ln_solid"></div>
+                                    <div class="form-group">
+                                        <div class="col-md-9 col-sm-9 col-md-offset-3">
+                                            <button type="submit" class="btn btn-primary">Actualizar</button>
+                                            <a href="/pets" class="btn btn-default">Cancelar</a>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div th:replace="~{page-templates :: footer}"></div>
+    </div>
+</div>
+
+<script th:src="@{/vendors/jquery/dist/jquery.min.js}"></script>
+<script th:src="@{/vendors/bootstrap/dist/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/vendors/fastclick/lib/fastclick.js}"></script>
+<script th:src="@{/vendors/nprogress/nprogress.js}"></script>
+<script th:src="@{/build/js/custom.min.js}"></script>
+</body>
+</html>

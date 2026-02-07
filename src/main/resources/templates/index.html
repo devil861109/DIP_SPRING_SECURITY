@@ -24,8 +24,11 @@
 		<div class="col-md-3 left_col">
 			<div class="left_col scroll-view">
 				<div class="navbar nav_title" style="border: 0;">
-					<a href="index.html" class="site_title"><i class="fa fa-paw"></i> <span>HOME</span></a>
+					<a href="/login" class="site_title"><i class="fa fa-paw"></i> <span>Pet Care</span></a>
 				</div>
+				<br />
+				<br />
+				<br />
 				<!-- menu profile quick info -->
 				<div th:replace="~{page-templates :: menuprofile}"></div>
 				<!-- /menu profile quick info -->
@@ -49,39 +52,141 @@
 			<div class="">
 				<div class="page-title">
 					<div class="title_left">
-						<h3>Plain Page</h3>
+						<h3>Veterinaria PetCare</h3>
 					</div>
 				</div>
 				<div class="clearfix"></div>
+
+				<!-- Welcome Banner -->
 				<div class="row">
-					<div class="col-md-12 col-sm-12  ">
+					<div class="col-md-12 col-sm-12">
+						<div class="x_panel" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px;">
+							<h2 style="color: white; margin-bottom: 10px;">¡Bienvenido a PetCare!</h2>
+							<p style="font-size: 16px; margin: 0;">Tu centro veterinario de confianza para el cuidado integral de tus mascotas.</p>
+						</div>
+					</div>
+				</div>
+
+				<!-- Services Section -->
+				<div class="row">
+					<div class="col-md-4 col-sm-6">
 						<div class="x_panel">
 							<div class="x_title">
-								<h2>Plain Page</h2>
-								<ul class="nav navbar-right panel_toolbox">
-									<li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
-									</li>
-									<li class="dropdown">
-										<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
-										<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-											<a class="dropdown-item" href="#">Settings 1</a>
-											<a class="dropdown-item" href="#">Settings 2</a>
-										</div>
-									</li>
-									<li><a class="close-link"><i class="fa fa-close"></i></a>
-									</li>
-								</ul>
+								<h2><i class="fa fa-stethoscope" style="color: #667eea;"></i> Consultas Veterinarias</h2>
 								<div class="clearfix"></div>
 							</div>
 							<div class="x_content">
-								<div th:replace="~{page-templates :: main-text}"></div>
-								<div class="text">
-									<h2 th:text="${text}"></h2>
-								</div>
+								<p>Consultas generales y especializadas para el cuidado de la salud de tus mascotas por médicos veterinarios certificados.</p>
+								<a href="#" class="btn btn-primary btn-sm"><i class="fa fa-arrow-right"></i> Agendar cita</a>
+							</div>
+						</div>
+					</div>
+
+					<div class="col-md-4 col-sm-6">
+						<div class="x_panel">
+							<div class="x_title">
+								<h2><i class="fa fa-cut" style="color: #764ba2;"></i> Cirugías</h2>
+								<div class="clearfix"></div>
+							</div>
+							<div class="x_content">
+								<p>Procedimientos quirúrgicos de rutina y emergencia realizados por especialistas con tecnología de punta.</p>
+								<a href="#" class="btn btn-primary btn-sm"><i class="fa fa-arrow-right"></i> Más información</a>
+							</div>
+						</div>
+					</div>
+
+					<div class="col-md-4 col-sm-6">
+						<div class="x_panel">
+							<div class="x_title">
+								<h2><i class="fa fa-heart" style="color: #ff6b9d;"></i> Urgencias 24/7</h2>
+								<div class="clearfix"></div>
+							</div>
+							<div class="x_content">
+								<p>Servicio de emergencia disponible las 24 horas para atender cualquier situación urgente de tu mascota.</p>
+								<a href="#" class="btn btn-danger btn-sm"><i class="fa fa-phone"></i> Llamar ahora</a>
 							</div>
 						</div>
 					</div>
 				</div>
+
+				<!-- Additional Services -->
+				<div class="row">
+					<div class="col-md-3 col-sm-6">
+						<div class="x_panel">
+							<div class="x_title">
+								<h2><i class="fa fa-syringe" style="color: #00b4db;"></i> Vacunas</h2>
+								<div class="clearfix"></div>
+							</div>
+							<div class="x_content">
+								<p>Programa completo de vacunación según la edad y raza de tu mascota.</p>
+							</div>
+						</div>
+					</div>
+
+					<div class="col-md-3 col-sm-6">
+						<div class="x_panel">
+							<div class="x_title">
+								<h2><i class="fa fa-tooth" style="color: #f093fb;"></i> Odontología</h2>
+								<div class="clearfix"></div>
+							</div>
+							<div class="x_content">
+								<p>Limpiezas dentales y tratamientos para la salud bucal de tus mascotas.</p>
+							</div>
+						</div>
+					</div>
+
+					<div class="col-md-3 col-sm-6">
+						<div class="x_panel">
+							<div class="x_title">
+								<h2><i class="fa fa-flask" style="color: #4facfe;"></i> Laboratorio</h2>
+								<div class="clearfix"></div>
+							</div>
+							<div class="x_content">
+								<p>Análisis clínicos y pruebas de diagnóstico con resultados rápidos.</p>
+							</div>
+						</div>
+					</div>
+
+					<div class="col-md-3 col-sm-6">
+						<div class="x_panel">
+							<div class="x_title">
+								<h2><i class="fa fa-spa" style="color: #43e97b;"></i> Grooming</h2>
+								<div class="clearfix"></div>
+							</div>
+							<div class="x_content">
+								<p>Servicio de baño, corte y acondicionamiento para mantener a tu mascota hermosa.</p>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Contact Info -->
+				<div class="row">
+					<div class="col-md-12 col-sm-12">
+						<div class="x_panel">
+							<div class="x_title">
+								<h2><i class="fa fa-info-circle"></i> Información de Contacto</h2>
+								<div class="clearfix"></div>
+							</div>
+							<div class="x_content">
+								<div class="row">
+									<div class="col-md-4">
+										<p><strong><i class="fa fa-phone"></i> Teléfono:</strong><br/>+1 (555) 123-4567</p>
+									</div>
+									<div class="col-md-4">
+										<p><strong><i class="fa fa-envelope"></i> Email:</strong><br/>contacto@petcare.com</p>
+									</div>
+									<div class="col-md-4">
+										<p><strong><i class="fa fa-map-marker"></i> Ubicación:</strong><br/>Calle Principal 123, Ciudad</p>
+									</div>
+								</div>
+								<hr/>
+								<p style="color: #666;"><strong>Horario de Atención:</strong> Lunes a Viernes 9:00 AM - 6:00 PM | Sábado 10:00 AM - 4:00 PM | Domingo Cerrado</p>
+							</div>
+						</div>
+					</div>
+				</div>
+
 			</div>
 		</div>
 		<!-- /page content -->

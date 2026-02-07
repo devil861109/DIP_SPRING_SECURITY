@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Spring Boot - UNAM</title>
+    <link th:href="@{/vendors/bootstrap/dist/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{/vendors/fontawesome/css/font-awesome.min.css}" rel="stylesheet">
+    <link th:href="@{/vendors/nprogress/nprogress.css}" rel="stylesheet">
+    <link th:href="@{/build/css/custom.min.css}" rel="stylesheet">
+</head>
+<body class="nav-md">
+<div class="container body">
+    <div class="main_container">
+        <div class="col-md-3 left_col">
+            <div class="left_col scroll-view">
+                <div class="navbar nav_title" style="border: 0;">
+                    <a href="index.html" class="site_title"><i class="fa fa-paw"></i> <span>HOME</span></a>
+                </div>
+                <div th:replace="~{page-templates :: menuprofile}"></div>
+                <br />
+                <div th:replace="~{page-templates :: sidebar}"></div>
+                <div th:replace="~{page-templates :: menufooter}"></div>
+            </div>
+        </div>
+
+        <div th:replace="~{page-templates :: topnavigation}"></div>
+
+        <div class="right_col" role="main">
+            <div class="">
+                <div class="page-title">
+                    <div class="title_left">
+                        <h3>Rick and Morty</h3>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+
+                <div class="row">
+                    <div class="col-md-12 col-sm-12">
+                        <div class="x_panel">
+                            <div class="x_title">
+                                <h2>Buscar personaje</h2>
+                                <ul class="nav navbar-right panel_toolbox">
+                                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                                    <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+                                </ul>
+                                <div class="clearfix"></div>
+                            </div>
+                            <div class="x_content">
+                                <form action="/rickmorty" method="get" class="form-inline">
+                                    <div class="form-group">
+                                        <input type="text" name="personaje" class="form-control" placeholder="ID o nombre">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Buscar</button>
+                                </form>
+
+                                <div th:if="${error}" class="alert alert-danger" role="alert" style="margin-top: 15px;">
+                                    <span th:text="${error}"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row" th:if="${personaje}">
+                    <div class="col-md-12 col-sm-12">
+                        <div class="x_panel">
+                            <div class="x_title">
+                                <h2 th:text="${personaje.name}"></h2>
+                                <ul class="nav navbar-right panel_toolbox">
+                                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                                    <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+                                </ul>
+                                <div class="clearfix"></div>
+                            </div>
+                            <div class="x_content">
+                                <div class="row">
+                                    <div class="col-md-4 col-sm-12 text-center">
+                                        <img th:src="${personaje.image}" alt="imagen" class="img-responsive" style="display:inline-block;">
+                                    </div>
+                                    <div class="col-md-8 col-sm-12">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="x_panel">
+                                                    <div class="x_title">
+                                                        <h2>Detalles</h2>
+                                                        <div class="clearfix"></div>
+                                                    </div>
+                                                    <div class="x_content">
+                                                        <p><strong>ID:</strong> <span th:text="${personaje.id}"></span></p>
+                                                        <p><strong>Status:</strong> <span th:text="${personaje.status}"></span></p>
+                                                        <p><strong>Especie:</strong> <span th:text="${personaje.species}"></span></p>
+                                                        <p><strong>Género:</strong> <span th:text="${personaje.gender}"></span></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="x_panel">
+                                                    <div class="x_title">
+                                                        <h2>Origen</h2>
+                                                        <div class="clearfix"></div>
+                                                    </div>
+                                                    <div class="x_content">
+                                                        <p th:text="${personaje.origin.name}"></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="x_panel">
+                                                    <div class="x_title">
+                                                        <h2>Ubicación actual</h2>
+                                                        <div class="clearfix"></div>
+                                                    </div>
+                                                    <div class="x_content">
+                                                        <p th:text="${personaje.location.name}"></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="x_panel">
+                                                    <div class="x_title">
+                                                        <h2>Episodios</h2>
+                                                        <div class="clearfix"></div>
+                                                    </div>
+                                                    <div class="x_content">
+                                                        <ul class="list-group">
+                                                            <li class="list-group-item" th:each="ep : ${personaje.episode}">
+                                                                <i class="fa fa-television"></i>
+                                                                <span th:text="${ep}"></span>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div th:replace="~{page-templates :: footer}"></div>
+    </div>
+</div>
+
+<script th:src="@{/vendors/jquery/dist/jquery.min.js}"></script>
+<script th:src="@{/vendors/bootstrap/dist/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/vendors/fastclick/lib/fastclick.js}"></script>
+<script th:src="@{/vendors/nprogress/nprogress.js}"></script>
+<script th:src="@{/build/js/custom.min.js}"></script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Spring Boot - UNAM</title>
+    <link th:href="@{/vendors/bootstrap/dist/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{/vendors/fontawesome/css/font-awesome.min.css}" rel="stylesheet">
+    <link th:href="@{/vendors/nprogress/nprogress.css}" rel="stylesheet">
+    <link th:href="@{/build/css/custom.min.css}" rel="stylesheet">
+</head>
+<body class="nav-md">
+<div class="container body">
+    <div class="main_container">
+        <div class="col-md-3 left_col">
+            <div class="left_col scroll-view">
+                <div class="navbar nav_title" style="border: 0;">
+                    <a href="index.html" class="site_title"><i class="fa fa-paw"></i> <span>HOME</span></a>
+                </div>
+                <div th:replace="~{page-templates :: menuprofile}"></div>
+                <br />
+                <div th:replace="~{page-templates :: sidebar}"></div>
+                <div th:replace="~{page-templates :: menufooter}"></div>
+            </div>
+        </div>
+
+        <div th:replace="~{page-templates :: topnavigation}"></div>
+
+        <div class="right_col" role="main">
+            <div class="">
+                <div class="page-title">
+                    <div class="title_left">
+                        <h3>PetStore</h3>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+
+                <div class="row">
+                    <div class="col-md-12 col-sm-12">
+                        <div class="x_panel">
+                            <div class="x_title">
+                                <h2>Filtrar Mascotas</h2>
+                                <ul class="nav navbar-right panel_toolbox">
+                                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                                    <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+                                </ul>
+                                <div class="clearfix"></div>
+                            </div>
+                            <div class="x_content">
+                                <form action="/pets" method="get" class="form-inline">
+                                    <div class="form-group">
+                                        <label for="status" style="margin-right: 10px;">Estado:</label>
+                                        <select name="status" id="status" class="form-control">
+                                            <option value="available" th:selected="${status=='available'}">Disponible</option>
+                                            <option value="pending" th:selected="${status=='pending'}">Pendiente</option>
+                                            <option value="sold" th:selected="${status=='sold'}">Vendido</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary" style="margin-left: 10px;">
+                                        <i class="fa fa-filter"></i> Filtrar
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 col-sm-12">
+                        <div class="x_panel">
+                            <div class="x_title">
+                                <h2>Mascotas</h2>
+                                <ul class="nav navbar-right panel_toolbox">
+                                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                                    <li><a class="close-link"><i class="fa fa-close"></i></a></li>
+                                </ul>
+                                <div class="clearfix"></div>
+                            </div>
+                            <div class="x_content">
+                                <div class="clearfix" style="margin-bottom: 12px;">
+                                    <a href="/pets/crear" class="btn btn-primary">
+                                        <i class="fa fa-plus"></i> Crear nueva mascota
+                                    </a>
+                                </div>
+
+                                <ul class="list-group">
+                                    <li class="list-group-item" th:each="p : ${pets}">
+                                        <div class="row">
+                                            <div class="col-md-1 col-sm-2 text-center">
+                                                <i class="fa fa-paw fa-2x" style="color: #FF6B6B;"></i>
+                                            </div>
+                                            <div class="col-md-2 col-sm-3 text-center">
+                                                <img th:if="${p.photoUrls != null and !p.photoUrls.isEmpty()}"
+                                                     th:src="${p.photoUrls[0]}"
+                                                     alt="foto"
+                                                     class="img-circle"
+                                                     style="width: 56px; height: 56px; object-fit: cover;">
+                                            </div>
+                                            <div class="col-md-5 col-sm-4">
+                                                <strong th:text="${p.name}"></strong>
+                                                <div class="text-muted">
+                                                    <span th:if="${p.status == 'available'}" class="badge" style="background-color: #28a745; color: #fff;">Disponible</span>
+                                                    <span th:if="${p.status == 'pending'}" class="badge" style="background-color: #ffc107; color: #fff;">Pendiente</span>
+                                                    <span th:if="${p.status == 'sold'}" class="badge" style="background-color: #6c757d; color: #fff;">Vendido</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 col-sm-3 text-right">
+                                                <a class="btn btn-sm btn-info" th:href="@{'/pets/editar/' + ${p.id}}">
+                                                    <i class="fa fa-pencil"></i> Editar
+                                                </a>
+                                                <a class="btn btn-sm btn-danger" th:href="@{'/pets/eliminar/' + ${p.id}}">
+                                                    <i class="fa fa-trash"></i> Eliminar
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div th:replace="~{page-templates :: footer}"></div>
+    </div>
+</div>
+
+<script th:src="@{/vendors/jquery/dist/jquery.min.js}"></script>
+<script th:src="@{/vendors/bootstrap/dist/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/vendors/fastclick/lib/fastclick.js}"></script>
+<script th:src="@{/vendors/nprogress/nprogress.js}"></script>
+<script th:src="@{/build/js/custom.min.js}"></script>
+</body>
+</html>

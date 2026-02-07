@@ -19,7 +19,7 @@
 </head>
 <body>
 
-<div class="profile clearfix" th:fragment="menuprofile">
+<div sec:authorize="isAuthenticated()" class="profile clearfix" th:fragment="menuprofile">
 	<div class="profile_pic">
 		<img th:src="@{/images/img.jpg}" alt="..." class="img-circle profile_img">
 	</div>
@@ -35,27 +35,34 @@
 
 <div id="sidebar-menu" class="main_menu_side hidden-print main_menu" th:fragment="sidebar">
 	<div class="menu_section">
-		<h3>General</h3>
+		<h3></h3>
 		<ul class="nav side-menu">
-			<li><a><i class="fa fa-home"></i> Home <span class="fa fa-chevron-down"></span></a>
+			<li sec:authorize="!isAuthenticated()"><a href="/login"><i class="fa fa-user-secret"></i> Login </a></li>
+			<li sec:authorize="isAuthenticated()"><a><i class="fa fa-home"></i> Home <span class="fa fa-chevron-down"></span></a>
 				<ul class="nav child_menu">
-					<li class="nav-item"><a href="/">Home</a></li>
+					<!-- li class="nav-item"><a href="/">Home</a></li -->
 					<li sec:authorize="hasAuthority('USER')" class="nav-item"><a href="/user">User</a></li>
 					<li sec:authorize="hasAuthority('ADMIN')" class="nav-item"><a href="/admin">Admin</a></li>
-					<li sec:authorize="!isAuthenticated()" class="nav-item"><a href="/login">Login</a></li>
-					<li sec:authorize="!isAuthenticated()" class="nav-item"><a href="/register">Register</a></li>
-					<li sec:authorize="isAuthenticated()" class="nav-item">
-						<form class="link" th:action="@{/doLogout}" method="post">
-							<input class="link" type="submit" value="Logout"/>
-						</form></li>
+					<li sec:authorize="hasAnyAuthority('ADMIN','USER')"><a><i class="fa fa-sitemap"></i> APIs <span class="fa fa-chevron-down"></span></a>
+						<ul class="nav child_menu">
+							<li sec:authorize="hasAnyAuthority('ADMIN','USER')" class="nav-item"><a href="/pokemon">Pokédex</a></li>
+							<li sec:authorize="hasAnyAuthority('ADMIN','USER')" class="nav-item"><a href="/rickmorty">Rick & Morty</a></li>
+							<li sec:authorize="hasAnyAuthority('ADMIN','USER')"><a>Pet Store<span class="fa fa-chevron-down"></span></a>
+								<ul class="nav child_menu">
+									<li class="sub_menu"><a href="/pets">CRUD</a></li>
+								</ul>
+							</li>
+						</ul>
+					</li>
 				</ul>
 			</li>
+			<li sec:authorize="!isAuthenticated()"><a href="/register"><i class="fa fa-registered"></i> Register </a></li>
 		</ul>
 	</div>
 </div>
 
 
-<div class="top_nav" th:fragment="topnavigation">
+<div sec:authorize="isAuthenticated()" class="top_nav" th:fragment="topnavigation">
 	<div class="nav_menu">
 		<div class="nav toggle">
 			<a id="menu_toggle"><i class="fa fa-bars"></i></a>
@@ -73,7 +80,13 @@
 							<span>Settings</span>
 						</a>
 						<a class="dropdown-item"  href="javascript:;">Help</a>
-						<a class="dropdown-item"  href="login.html"><i class="fa fa-sign-out pull-right"></i> Log Out</a>
+
+						<form th:action="@{/doLogout}" method="post" style="display: inline;">
+							<a class="dropdown-item" onclick="this.closest('form').submit(); return false;">
+								<i class="fa fa-sign-out pull-right"></i> Log Out
+							</a>
+						</form>
+
 					</div>
 				</li>
 			</ul>
@@ -92,16 +105,24 @@
 	<a data-toggle="tooltip" data-placement="top" title="Lock">
 		<span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
 	</a>
-	<a data-toggle="tooltip" data-placement="top" title="Logout" href="login.html">
-		<span class="glyphicon glyphicon-off" aria-hidden="true"></span>
-	</a>
+	<form th:action="@{/doLogout}" method="post" style="display: inline;">
+		<a data-toggle="tooltip" data-placement="top" title="Logout" href="#"
+		   onclick="this.closest('form').submit(); return false;">
+			<span class="glyphicon glyphicon-off" aria-hidden="true"></span>
+		</a>
+	</form>
 </div>
-
 
 
 <div th:fragment="main-text"></div>
 <div th:fragment="footer">
-	<p class="center">&#169; Alfonso Rivero - Spring Security</p>
+	<footer class="footer">
+		<div class="pull-right">
+			Alfonso Rivero - Spring Security
+		</div>
+		<div class="clearfix"></div>
+	</footer>
 </div>
+
 </body>
 </html>
