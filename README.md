@@ -1,7 +1,7 @@
 # DIP_SPRING_SECURITY
 Diplomado UNAM - Spring Security
 
-This repository is for an example application built in **Spring Boot 3.5.9**
+This repository is for an example application built in **Spring Boot 3.5.10**
 
 The application is a simple Spring Boot 3 project designed to help students learn how
 to use the Spring Framework with Spring Security Framework. 
@@ -32,7 +32,7 @@ This is a Spring Boot 3 application that demonstrates the implementation of Spri
 - Best practices for securing Spring Boot applications
 
 ## Technologies Used
-- **Spring Boot**: 3.5.9
+- **Spring Boot**: 3.5.10
 - **Spring Security**: Latest compatible version
 - **Spring Web**: For RESTful web services
 - **Spring DevTools**: For development convenience
