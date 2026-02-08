@@ -1,7 +1,7 @@
 # DIP_SPRING_SECURITY
 Diplomado UNAM - Spring Security
 
-A simple **Spring Boot 3.5.9** app to learn Spring Security.
+A simple **Spring Boot 3.5.10** app to learn Spring Security.
 
 **Current behavior:** all endpoints are open (no login required yet).
 
