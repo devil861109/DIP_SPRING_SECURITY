@@ -1,13 +1,16 @@
 # DIP_SPRING_SECURITY
 Diplomado UNAM - Spring Security
 
-A **Spring Boot 3.5.10** app to learn Spring Security with authentication, role-based access control, and Thymeleaf templates.
+A **Spring Boot 3.5.10** app to learn Spring Security with **JWT token-based authentication**, role-based access control, and Thymeleaf templates.
 
 **Current behavior (based on `SecurityConfiguration.java`):**
+- **Stateless JWT authentication** - tokens stored in cookies
 - All routes are currently open because `"/**"` is permitted in the matcher list
 - `/user` and `/admin` role rules are present but effectively bypassed
-- Custom login page still exists at `/login`
-- Custom logout URL is `/doLogout`
+- Custom login page at `/login`
+- Custom logout handler at `/doLogout`
+- JWT tokens generated on login and validated via `JWTAuthenticationFilter`
+- `/api/**` routes are publicly accessible
 
 ---
 
@@ -89,11 +92,19 @@ src/main/java/edu/unam/springsecurity/
 │       ├── UserInfoService.java        ← User information
 │       └── UserInfoRoleService.java    ← User role info
 │
-├── security/                            ← Security module
-│   ├── SecurityConfiguration.java      ← Security config (note: `"/**"` is permitted)
-│   └── service/
-│       ├── UserDetailsServiceImpl.java ← Loads users from DB
-│       └── AuthenticationProviderImpl.java
+└── security/                            ← Security module
+    ├── SecurityConfiguration.java      ← Security config with JWT
+    ├── jwt/
+    │   ├── JWTTokenProvider.java       ← Token generation/validation
+    │   └── JWTAuthenticationFilter.java ← Token validation filter
+    ├── logout/
+    │   └── CustomLogoutSuccessHandler.java ← Custom logout logic
+    ├── service/
+    │   ├── UserDetailsServiceImpl.java  ← Loads users from DB
+    │   └── AuthenticationProviderImpl.java
+    ├── model/
+    ├── dto/
+    └── request/
 
 src/main/resources/
 ├── application.properties               ← Port and credentials
@@ -226,13 +237,22 @@ public class HomeController {
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
+    @Autowired
+    private UserDetailsServiceImpl uds;
+    @Autowired
+    private JWTTokenProvider tokenProvider;
+    @Autowired
+    private CustomLogoutSuccessHandler customLogoutSuccessHandler;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        JWTAuthenticationFilter jwtFilter = new JWTAuthenticationFilter(tokenProvider, uds);
         http
             .authorizeHttpRequests((authz) -> authz
                 .requestMatchers("/css/**", "/favicon.ico", "/**", "/index", "/build/**", "/images/**", "/vendors/**").permitAll()
                 .requestMatchers("/user").hasAnyRole("USER")
                 .requestMatchers("/admin").hasAnyRole("ADMIN")
+                .requestMatchers("/api/**").permitAll()
                 .anyRequest().authenticated()
             )
             .formLogin(login -> login
@@ -243,12 +263,18 @@ public class SecurityConfiguration {
             )
             .logout(logout -> logout
                 .logoutUrl("/doLogout")
-                .logoutSuccessUrl("/")
+                .logoutSuccessUrl("/index")
                 .deleteCookies("JSESSIONID")
+                .logoutSuccessHandler(customLogoutSuccessHandler)
+                .clearAuthentication(true)
                 .invalidateHttpSession(true)
             )
-            .csrf(Customizer.withDefaults())
-            .cors(Customizer.withDefaults());
+            .addFilterAfter(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+            .csrf(AbstractHttpConfigurer::disable)
+            .cors(Customizer.withDefaults())
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            );
 
         return http.build();
     }
@@ -275,11 +301,13 @@ public class SecurityConfiguration {
 ```
 **What it does:**
 - Permits all static assets and **all routes** due to `"/**"`
+- Injects JWT token provider and custom logout handler
+- JWT filter validates tokens from cookies
+- Form login generates JWT token on successful authentication
+- Custom logout handler clears JWT cookie
+- Session policy set to `STATELESS` (no session storage)
+- CSRF disabled (suitable for stateless JWT auth)
 - Role checks for `/user` and `/admin` exist but are currently bypassed
-- Custom login page at `/login`
-- Custom logout URL at `/doLogout`
-- Clears `JSESSIONID` and invalidates session on logout
-- Uses BCrypt password hashing and database-backed `UserDetailsServiceImpl`
 
 ---
 
@@ -296,9 +324,10 @@ public class SecurityConfiguration {
 
 ## Credentials
 
-Users are loaded from the database (MariaDB) using email as the username:
-- `UserDetailsServiceImpl` calls `UserInfoRepository.findByUseEmail(...)`
-- Passwords are stored as BCrypt hashes
+- **JWT Token Generation**: On successful login, `JWTTokenProvider` generates a JWT token with user claims
+- **Token Storage**: JWT tokens are stored in HTTP cookies (named "token")
+- **User Lookup**: `UserDetailsServiceImpl` loads users by email from the database
+- **Password Hashing**: Passwords are stored as BCrypt hashes
 
 To enforce roles, remove `"/**".permitAll()` from `SecurityConfiguration.java`.
 
@@ -358,6 +387,7 @@ Defines dependencies:
 - Thymeleaf Extras (Spring Security)
 - Spring Boot Starter Data JPA
 - MariaDB JDBC Driver
+- JJWT (JSON Web Token library)
 - Lombok
 
 ### application.properties
@@ -445,9 +475,19 @@ To enable RBAC, remove `"/**".permitAll()` from `SecurityConfiguration.java`.
 - Ensure the password is BCrypt-hashed
 - Check `spring.datasource.*` settings
 
+### "JWT token not found in cookie"
+- Check browser Developer Tools (F12) → Application → Cookies
+- Ensure login is successful (JWT is generated on successful form login)
+- Token cookie is named "token"
+
+### "JWT validation error"
+- Ensure `jwt.secret` is configured in `application.properties`
+- Check `jwt.expirationDateInMs` setting
+- Token may have expired; login again
+
 ### "403 Forbidden when accessing /admin"
 - This should not happen while `"/**"` is permitted
-- If you remove it, login as **admin / password** instead
+- If you remove it, login as **admin** user
 
 ### "401 Unauthorized / Redirected to login"
 - This should not happen while `"/**"` is permitted
@@ -496,5 +536,5 @@ See [LICENSE](LICENSE)
 **Welcome to the Spring Security course!**
 
 _Last updated: February 8, 2026_  
-_Version: 3.4 (DB-backed Auth + Modular Structure)_  
+_Version: 3.5 (JWT Token-Based Auth + Stateless Sessions)_  
 _Status: Ready to learn_
