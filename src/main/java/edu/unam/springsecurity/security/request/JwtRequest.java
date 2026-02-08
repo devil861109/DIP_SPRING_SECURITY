@@ -19,6 +19,8 @@ public class JwtRequest {
     private String userName;
     private Long expiryDuration;
     private Collection<? extends GrantedAuthority> authorities;
+    private String refreshToken;
+    private Long refreshTokenExpiry;
 
     public JwtRequest(String token, Long userId, String userName, Long expiryDuration,
                       Collection<? extends GrantedAuthority> authorities) {
