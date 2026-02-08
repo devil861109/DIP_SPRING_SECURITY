@@ -1,34 +1,38 @@
 server:
-  port: 8090
+  port: ${SERVER_PORT:8090}
 
 # Set here configurations for the database connection
 spring:
+  application:
+    name: ${SPRING_APP_NAME:DIP_SPRING_SECURITY}
   datasource:
-    url: jdbc:mariadb://localhost:3306/springsecurity
-    username: root
-    password: d1p10m4d0j4v4
-    driver-class-name: org.mariadb.jdbc.Driver
+    url: ${SPRING_DATASOURCE_URL:jdbc:mariadb://localhost:3306/springsecurity}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWD:d1p10m4d0j4v4}
+    driver-class-name: ${SPRING_DATASOURCE_DRIVER:org.mariadb.jdbc.Driver}
   jpa:
-    show-sql: true
+    show-sql: ${SPRING_SHOW_SQL:true}
     hibernate:
-      ddl-auto: none
+      ddl-auto: ${SPRING_DDL_AUTO:none}
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MariaDBDialect
-        format_sql: true
+        #dialect: ${SPRING_DDL_DIALECT:org.hibernate.dialect.MariaDBDialect}
+        format_sql: ${SPRING_FORMAT_SQL:true}
   security:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: http://localhost:8080/realms/SpringBootAppTest/protocol/openid-connect/certs
+          jwk-set-uri: ${SPRING_SECURITY_OAUTH_URI:http://localhost:8080/realms/SpringBootAppTest/protocol/openid-connect/certs}
 
 # LOGGING LEVEL
 logging:
   level:
-    root: INFO
+    org.springframework.security: ${SPRING_SECURITY_LOG_LEVEL:TRACE}
+  pattern:
+    console: ${SPRING_SECURITY_LOG_PATTERN_CONSOLE:%green(%d{HH:mm:ss.SSS}) %blue(%-5level) %red([%thread]) %yellow(%logger{15}) - %msg%n}
 
 # JWT
 jwt:
-  secret: 5f39c83d2d0482e07b5306f3f5a0fd8e1b4e9844987121ba4b99f3f4805fd4f85cc0f24ece8556dd10456a45d20cd2d61e7c36a77583674be979b071b869f34f
-  expirationDateInMs: 3600
-  refreshExpirationDateInMs: 900
+  secret: ${SPRING_JWT_SECRET:5f39c83d2d0482e07b5306f3f5a0fd8e1b4e9844987121ba4b99f3f4805fd4f85cc0f24ece8556dd10456a45d20cd2d61e7c36a77583674be979b071b869f34f}
+  expirationDateInMs: ${SPRING_JWT_EXP_DATE_MS:3600}
+  refreshExpirationDateInMs: ${SPRING_JWT_REFRESH_EXP_DATE_MS:900}
