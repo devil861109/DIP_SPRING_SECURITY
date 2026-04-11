@@ -171,16 +171,61 @@ public class SecurityConfiguration {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests((authz) -> authz
-                .requestMatchers("/auth/**").permitAll()
-                .requestMatchers("/**").permitAll()
+                .requestMatchers("/css/**", "/favicon.ico", "/**", "/index").permitAll()
+                .requestMatchers("/user").hasAnyRole("USER")
+                .requestMatchers("/admin").hasAnyRole("ADMIN")
                 .anyRequest().authenticated()
-            );
+            )
+            .formLogin(login -> login
+                .defaultSuccessUrl("/")
+                .permitAll())
+            .logout(logout -> logout
+                .logoutSuccessUrl("/"));
 
         return http.build();
     }
+
+    @Bean
+    PasswordEncoder passwordEncoder() {
+        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    }
+
+    @Bean
+    UserDetailsManager inMemoryUserDetailsManager() {
+        var user1 = User.withUsername("user").password("{noop}password").roles("USER").build();
+        var user2 = User.withUsername("admin").password("{noop}password").roles("USER", "ADMIN").build();
+        return new InMemoryUserDetailsManager(user1, user2);
+    }
 }
 ```
-**What it does:** Allows all requests (no login yet).
+**What it does (real behavior today):**
+
+- Defines the HTTP security rules in `securityFilterChain`.
+- Configures `formLogin` with `defaultSuccessUrl("/")` and logout redirect to `/`.
+- Registers an in-memory user store with two users:
+  - `user / password` with role `USER`
+  - `admin / password` with roles `USER, ADMIN`
+- Exposes a `PasswordEncoder` bean (`DelegatingPasswordEncoder`).
+
+#### Rule evaluation notes (important)
+
+Spring Security evaluates request matchers in order (first match wins):
+
+1. `.requestMatchers("/css/**", "/favicon.ico", "/**", "/index").permitAll()`
+2. `.requestMatchers("/user").hasAnyRole("USER")`
+3. `.requestMatchers("/admin").hasAnyRole("ADMIN")`
+4. `.anyRequest().authenticated()`
+
+Because `"/**"` is included in rule 1, **all routes match `permitAll()` first**.
+
+That means:
+- `/user` and `/admin` are currently public, despite role rules being declared.
+- `anyRequest().authenticated()` is effectively not reached for normal routes.
+- Login page is configured, but authentication is not required with the current matcher order.
+
+#### If you want roles to actually protect routes
+
+Remove `"/**"` from the public matcher (or move it to a safer, explicit strategy), then keep only truly public paths like `/auth/**`, `/css/**`, `/favicon.ico`, `/` and `/index` as `permitAll()`.
 
 ---
 
@@ -198,13 +243,16 @@ public class SecurityConfiguration {
 
 ## Credentials
 
-Right now, no login is required because all endpoints are `permitAll()`.
+Right now, no login is required because `"/**"` is configured as `permitAll()`.
 
-If you later enable authentication, these properties can be used:
+`SecurityConfiguration` defines in-memory users:
+
 ```properties
-spring.security.user.name=jonathan
-spring.security.user.password=1234
+user / password  -> ROLE_USER
+admin / password -> ROLE_USER, ROLE_ADMIN
 ```
+
+Note: these come from `inMemoryUserDetailsManager()` in `SecurityConfiguration`, not from `spring.security.user.*` properties.
 
 ---
 
@@ -266,6 +314,8 @@ server.port=8090
 spring.security.user.name=jonathan
 spring.security.user.password=1234
 ```
+
+`spring.security.user.*` is kept as base configuration, but when `UserDetailsManager` is declared in code (as in this project), in-memory users from `SecurityConfiguration` are the active source.
 
 ---
 
