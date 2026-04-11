@@ -150,3 +150,38 @@ UserDetails user = (UserDetails) auth.getPrincipal();
 String username = user.getUsername();
 ```
 
+---
+
+### 9. Method Security (`@PreAuthorize`) en este proyecto
+
+Ademas de la seguridad por URL (`requestMatchers`), este proyecto habilita seguridad por metodo con:
+
+```java
+@EnableMethodSecurity
+```
+
+Eso permite anotar metodos de controlador/servicio con expresiones de autorizacion.
+
+Ejemplo real en `HomeController`:
+
+```java
+@GetMapping("/user")
+@PreAuthorize("hasRole('USER')")
+public String user(Model model) {
+    ...
+}
+
+@GetMapping("/admin")
+@PreAuthorize("hasRole('ADMIN')")
+public String admin(Model model) {
+    ...
+}
+```
+
+Lectura recomendada para alumnos:
+
+1. Seguridad por URL decide si una peticion entra a la capa MVC.
+2. Method Security decide si un metodo concreto puede ejecutarse.
+3. Si una ruta queda demasiado abierta por configuracion HTTP, `@PreAuthorize` puede seguir bloqueando ejecucion del metodo.
+
+

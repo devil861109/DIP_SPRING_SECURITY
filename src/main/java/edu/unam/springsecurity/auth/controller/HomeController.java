@@ -50,7 +50,7 @@ public class HomeController {
 	}
 
 	@GetMapping("/admin")
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasAuthority('ADMIN')")
 	public String admin(Model model) {
 		model.addAttribute("text", adminService.getText());
 		return "admin";

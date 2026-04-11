@@ -5,7 +5,7 @@ A **Spring Boot 3.5.10** app to learn Spring Security with authentication, role-
 
 **Current behavior (based on `SecurityConfiguration.java`):**
 - All routes are currently open because `"/**"` is permitted in the matcher list
-- `/user` and `/admin` role rules are present but effectively bypassed
+- `/user` and `/admin` are protected at method level via `@PreAuthorize`
 - Custom login page still exists at `/login`
 - Custom logout URL is `/doLogout`
 
@@ -225,6 +225,7 @@ public class HomeController {
 ```java
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -275,11 +276,35 @@ public class SecurityConfiguration {
 ```
 **What it does:**
 - Permits all static assets and **all routes** due to `"/**"`
-- Role checks for `/user` and `/admin` exist but are currently bypassed
+- Enables method-level checks with `@EnableMethodSecurity`
+- `/user` and `/admin` are guarded by `@PreAuthorize` in `HomeController`
 - Custom login page at `/login`
 - Custom logout URL at `/doLogout`
 - Clears `JSESSIONID` and invalidates session on logout
 - Uses BCrypt password hashing and database-backed `UserDetailsServiceImpl`
+
+#### Method Security (explained for diplomado)
+
+`@EnableMethodSecurity` turns on annotations like `@PreAuthorize`, `@PostAuthorize`, and `@Secured`.
+
+Current project example in `src/main/java/edu/unam/springsecurity/auth/controller/HomeController.java`:
+
+```java
+@GetMapping("/user")
+@PreAuthorize("hasRole('USER')")
+public String user(Model model) { ... }
+
+@GetMapping("/admin")
+@PreAuthorize("hasRole('ADMIN')")
+public String admin(Model model) { ... }
+```
+
+How to teach this clearly:
+
+- `requestMatchers(...)`: protects by URL pattern.
+- `@PreAuthorize(...)`: protects by method execution.
+- Best practice in real systems: use both (defense in depth).
+- In this project, URL rules remain open because of `"/**".permitAll()`, so method security is what effectively enforces roles for `/user` and `/admin`.
 
 ---
 
@@ -288,8 +313,9 @@ public class SecurityConfiguration {
 ```
 1. User opens http://localhost:8090/
 2. Request is allowed because "/**" is permitted
-3. Pages like /user and /admin also load without login
-4. Login page is still available at /login
+3. `/user` and `/admin` execute `@PreAuthorize` checks before controller logic
+4. If not authenticated, user is redirected to `/login`
+5. If authenticated without role, Spring returns `403 Forbidden`
 ```
 
 ---
@@ -300,7 +326,7 @@ Users are loaded from the database (MariaDB) using email as the username:
 - `UserDetailsServiceImpl` calls `UserInfoRepository.findByUseEmail(...)`
 - Passwords are stored as BCrypt hashes
 
-To enforce roles, remove `"/**".permitAll()` from `SecurityConfiguration.java`.
+Even with `"/**".permitAll()`, roles are currently enforced at method level via `@PreAuthorize`.
 
 ---
 
@@ -324,21 +350,23 @@ mvn spring-boot:run -Dspring-boot.run.arguments='--server.port=8091'
 | Page | URL | Access | Notes |
 |------|-----|--------|-------|
 | Home | `http://localhost:8090/` | Everyone | Always accessible (/** is permitAll) |
-| User Page | `http://localhost:8090/user` | Everyone | Role check currently bypassed |
-| Admin Page | `http://localhost:8090/admin` | Everyone | Role check currently bypassed |
+| User Page | `http://localhost:8090/user` | Authenticated USER/ADMIN | Enforced by `@PreAuthorize("hasRole('USER')")` |
+| Admin Page | `http://localhost:8090/admin` | Authenticated ADMIN | Enforced by `@PreAuthorize("hasRole('ADMIN')")` |
 | Login | `http://localhost:8090/login` | Everyone | Custom login form |
 | REST Endpoint | `http://localhost:8090/auth/welcome` | Everyone | Returns plain text |
 
 ### Option 1: Browser (Recommended)
 1. Open `http://localhost:8090/`
-2. Visit `/user` and `/admin` (both load because /** is permitted)
+2. Visit `/user` and `/admin` (you will be challenged by method security)
 3. Open `http://localhost:8090/login` to see the login form
 4. Logout endpoint is available at `/doLogout`
 
 ### Option 2: cURL
 ```bash
-# Public pages (all open)
+# Public page
 curl http://localhost:8090/
+
+# Protected by method security (usually redirects to login if anonymous)
 curl http://localhost:8090/user
 curl http://localhost:8090/admin
 
@@ -423,18 +451,22 @@ This architecture makes the codebase:
 
 ## Authentication Flow
 
-1. **Request any page** → Allowed because `"/**"` is `permitAll()`
-2. **Login page** → Available at `/login`
-3. **Database-backed auth** → `UserDetailsServiceImpl` loads user by email
-4. **Logout** → `/doLogout` clears session + cookie
+1. **Request home page** → Allowed by URL matcher (`"/**".permitAll()`).
+2. **Request `/user` or `/admin`** → `@PreAuthorize` runs before method execution.
+3. **If anonymous** → redirected to `/login`.
+4. **If authenticated without role** → `403 Forbidden`.
+5. **If role matches** → page renders.
 
 ---
 
 ## Role-Based Access Control (RBAC)
 
-The config includes role rules for `/user` and `/admin`, but **they are currently bypassed** because `"/**"` is permitted.
+This project demonstrates RBAC in two layers:
 
-To enable RBAC, remove `"/**".permitAll()` from `SecurityConfiguration.java`.
+- URL layer (`requestMatchers`) in `SecurityConfiguration`
+- Method layer (`@PreAuthorize`) in `HomeController`
+
+For production-style hardening, remove `"/**".permitAll()` and keep only explicit public routes.
 
 ---
 
@@ -446,12 +478,12 @@ To enable RBAC, remove `"/**".permitAll()` from `SecurityConfiguration.java`.
 - Check `spring.datasource.*` settings
 
 ### "403 Forbidden when accessing /admin"
-- This should not happen while `"/**"` is permitted
-- If you remove it, login as **admin / password** instead
+- This can happen if you are authenticated but missing `ADMIN` role
+- Login with an account that has `ADMIN`
 
 ### "401 Unauthorized / Redirected to login"
-- This should not happen while `"/**"` is permitted
-- If you remove it, login at `http://localhost:8090/login`
+- Expected when Method Security blocks anonymous access to protected methods
+- Login at `http://localhost:8090/login`
 
 ### "Maven not found"
 ```bash
@@ -481,9 +513,9 @@ Install from: https://www.oracle.com/java/technologies/downloads/#java17
 - [ ] Run `mvn clean install`
 - [ ] Run `mvn spring-boot:run`
 - [ ] Open http://localhost:8090/ (home)
-- [ ] Open http://localhost:8090/user and /admin (both open right now)
+- [ ] Open http://localhost:8090/user and /admin (verify Method Security behavior)
 - [ ] Open http://localhost:8090/login (login page)
-- [ ] Optional: remove `"/**".permitAll()` to enable role checks
+- [ ] Optional: remove `"/**".permitAll()` to harden URL-level security
 
 ---
 
