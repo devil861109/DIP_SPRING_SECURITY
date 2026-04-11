@@ -1,22 +1,29 @@
 # DIP_SPRING_SECURITY
-Diplomado UNAM - Spring Security
 
-A simple **Spring Boot 3.5.10** app to learn Spring Security.
+Proyecto del Diplomado UNAM para practicar integracion entre Spring Boot, Spring Security y Thymeleaf.
 
-**Current behavior:** all endpoints are open (no login required yet).
+## Estado actual
+
+- Framework: Spring Boot `3.5.10`
+- Java: `17`
+- Security: configurada, pero con acceso abierto (`permitAll`) para todas las rutas
+- UI: vistas Thymeleaf (`/`, `/user`, `/admin`)
+- API demo: endpoint REST en `/auth/welcome`
+
+> Importante: aunque existen propiedades de usuario/password, hoy no se requiere login porque la configuracion permite todo.
 
 ---
 
-## What You Need
+## Requisitos
 
-| Tool | Version | Download |
-|------|---------|----------|
-| Java | 17+ | https://www.oracle.com/java/technologies/downloads/#java17 |
-| Maven | 3.9.0+ | https://maven.apache.org/download.cgi |
-| Git | 2.44+ | https://git-scm.com/downloads |
-| IDE | IntelliJ or VS Code | https://www.jetbrains.com/idea/download/ |
+| Herramienta | Version sugerida |
+|---|---|
+| Java | 17+ |
+| Maven | 3.9+ |
+| Git | 2.44+ |
 
-**Verify installation:**
+Validacion rapida:
+
 ```bash
 java -version
 mvn -version
@@ -25,229 +32,165 @@ git --version
 
 ---
 
-## Quick Start (5 minutes)
+## Ejecucion local
 
-### 1. Clone the repository
-```bash
-git clone <repository-url>
-cd DIP_SPRING_SECURITY
-```
+Desde la raiz del proyecto:
 
-### 2. Build
 ```bash
 mvn clean install
-```
-
-### 3. Run
-```bash
 mvn spring-boot:run
 ```
 
-### 4. Test
-Open your browser: `http://localhost:8090/auth/welcome`
+La aplicacion arranca en `http://localhost:8090` por defecto.
 
-You should see: `Hello World Spring Security!`
+Tambien puedes usar el wrapper Maven:
+
+```bash
+./mvnw clean install
+./mvnw spring-boot:run
+```
 
 ---
 
-## Project Structure
+## Endpoints y vistas
 
+### Controlador REST
+
+| Ruta | Metodo | Controlador | Descripcion |
+|---|---|---|---|
+| `/auth/welcome` | GET | `HelloWorldController` | Responde texto plano: `Hello World Spring Security!` |
+
+### Controlador MVC (Thymeleaf)
+
+| Ruta | Metodo | Controlador | Servicio usado | Vista |
+|---|---|---|---|---|
+| `/` | GET | `HomeController.home` | `HomeService` | `index.html` |
+| `/index` | GET | `HomeController.index` | - | Redirecciona a `/` |
+| `/user` | GET | `HomeController.user` | `UserService` | `user.html` |
+| `/admin` | GET | `HomeController.admin` | `AdminService` | `admin.html` |
+
+---
+
+## Servicios (no documentados antes)
+
+Los siguientes servicios estan en `src/main/java/edu/unam/springsecurity/service/` y se inyectan en `HomeController`:
+
+| Servicio | Metodo | Retorno actual | Uso |
+|---|---|---|---|
+| `HomeService` | `getText()` | `"Home"` | Se pinta en `index.html` |
+| `UserService` | `getText()` | `"User"` | Se pinta en `user.html` |
+| `AdminService` | `getText()` | `"Admin"` | Se pinta en `admin.html` |
+
+En esta version son servicios demo (texto fijo) para mostrar inyeccion de dependencias y separacion por capas.
+
+---
+
+## Seguridad
+
+Archivo: `src/main/java/edu/unam/springsecurity/security/SecurityConfiguration.java`
+
+Reglas activas:
+
+- `requestMatchers("/auth/**").permitAll()`
+- `requestMatchers("/**").permitAll()`
+- `anyRequest().authenticated()`
+
+Debido a `"/**".permitAll()`, hoy todas las rutas quedan publicas.
+
+---
+
+## Configuracion (`application.properties`)
+
+Archivo: `src/main/resources/application.properties`
+
+```properties
+spring.application.name=${SPRING_APP_NAME:DIP_SPRING_SECURITY}
+server.port=${SERVER_PORT:8090}
+
+spring.security.user.name=${SECURITY_USERNAME:jonathan}
+spring.security.user.password=${SECURITY_PASSWORD:1234}
+
+logging.level.org.springframework.security=${SPRING_SECURITY_LOG_LEVEL:TRACE}
 ```
+
+Variables de entorno soportadas:
+
+- `SPRING_APP_NAME`
+- `SERVER_PORT`
+- `SECURITY_USERNAME`
+- `SECURITY_PASSWORD`
+- `SPRING_SECURITY_LOG_LEVEL`
+
+Ejemplo de ejecucion cambiando puerto y credenciales:
+
+```bash
+SERVER_PORT=8091 SECURITY_USERNAME=demo SECURITY_PASSWORD=demo123 mvn spring-boot:run
+```
+
+---
+
+## Estructura del proyecto
+
+```text
 src/main/java/edu/unam/springsecurity/
-├── SpringSecurityApplication.java      ← Entry point
-├── controller/
-│   └── HelloWorldController.java       ← Endpoints
-└── security/
-    └── SecurityConfiguration.java      ← Security config
+|-- SpringSecurityApplication.java
+|-- controller/
+|   |-- HelloWorldController.java
+|   `-- HomeController.java
+|-- security/
+|   `-- SecurityConfiguration.java
+`-- service/
+    |-- AdminService.java
+    |-- HomeService.java
+    `-- UserService.java
 
 src/main/resources/
-├── application.properties               ← Port and credentials
-├── static/                              ← Static assets (CSS, images, JS)
-│   └── css/
-│       └── style.css
-└── templates/                           ← Thymeleaf views
-    ├── admin.html
-    ├── index.html
-    ├── page-templates.html
-    └── user.html
-```
-
-### Important Files
-
-**application.properties** - App configuration
-```properties
-server.port=8090
-spring.security.user.name=jonathan
-spring.security.user.password=1234
-```
-
-**templates/** - Thymeleaf HTML views (rendered by controllers)
-
-**static/** - Public files served directly (e.g., `/css/style.css`)
-
----
-
-## The Code (Essential Only)
-
-### SpringSecurityApplication.java
-```java
-@SpringBootApplication
-public class SpringSecurityApplication {
-    public static void main(String[] args) {
-        SpringApplication.run(SpringSecurityApplication.class, args);
-    }
-}
-```
-**What it does:** Starts the Spring Boot app.
-
----
-
-### HelloWorldController.java
-```java
-@RestController
-@RequestMapping("/auth")
-public class HelloWorldController {
-    @GetMapping("/welcome")
-    public String welcome() {
-        return "Hello World Spring Security!";
-    }
-}
-```
-**What it does:** Defines `/auth/welcome`.
-
----
-
-### SecurityConfiguration.java
-```java
-@Configuration
-@EnableWebSecurity
-public class SecurityConfiguration {
-
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .authorizeHttpRequests((authz) -> authz
-                .requestMatchers("/auth/**").permitAll()
-                .requestMatchers("/**").permitAll()
-                .anyRequest().authenticated()
-            );
-
-        return http.build();
-    }
-}
-```
-**What it does:** Allows all requests (no login yet).
-
----
-
-## How It Works
-
-```
-1. Open http://localhost:8090/auth/welcome
-2. Spring Security allows the request (permitAll)
-3. You see: "Hello World Spring Security!"
+|-- application.properties
+|-- static/css/style.css
+`-- templates/
+    |-- admin.html
+    |-- index.html
+    |-- page-templates.html
+    `-- user.html
 ```
 
 ---
 
-## Credentials
-
-Right now, no login is required because all endpoints are `permitAll()`.
-
-If you later enable authentication, these properties can be used:
-```properties
-spring.security.user.name=jonathan
-spring.security.user.password=1234
-```
-
----
-
-## Useful Commands
+## Pruebas y comandos utiles
 
 ```bash
-mvn clean install
-mvn spring-boot:run
 mvn test
 mvn clean package
 java -jar target/DIP_SPRING_SECURITY-0.0.1-SNAPSHOT.jar
-mvn spring-boot:run -Dspring-boot.run.arguments='--server.port=8091'
-```
-
----
-
-## Test the App
-
-### Option 1: Browser
-1. Open `http://localhost:8090/auth/welcome`
-2. See: "Hello World Spring Security!"
-
-### Option 2: cURL
-```bash
 curl http://localhost:8090/auth/welcome
-```
-
-### Option 3: Static assets
-If the app is running, this file should be available:
-- `http://localhost:8090/css/style.css`
-
----
-
-## Project Configuration
-
-### pom.xml
-Defines dependencies:
-- Spring Boot Starter Web
-- Spring Boot Starter Security
-- Spring Boot Starter Thymeleaf
-- Spring Boot DevTools
-
-### application.properties
-```properties
-server.port=8090
-spring.security.user.name=jonathan
-spring.security.user.password=1234
+curl http://localhost:8090/user
+curl http://localhost:8090/admin
 ```
 
 ---
 
-## Contributing
+## Dependencias principales (`pom.xml`)
 
-If you find issues or want improvements:
-1. Open an issue
-2. Create a pull request
-3. Contact your instructor
-
----
-
-## Need Help?
-
-1. Check "Common Issues"
-2. See `QUICK_REFERENCE.md`
-3. Ask your instructor in Moodle
-4. Stack Overflow: https://stackoverflow.com/questions/tagged/spring-security
+- `spring-boot-starter`
+- `spring-boot-starter-web`
+- `spring-boot-starter-security`
+- `spring-boot-starter-thymeleaf`
+- `spring-boot-devtools` (runtime, opcional)
+- `spring-boot-starter-test` (test)
 
 ---
 
-## Checklist: First Steps
+## Proximo paso recomendado
 
-- [ ] Install Java 17+
-- [ ] Install Maven
-- [ ] Clone the repository
-- [ ] Run `mvn clean install`
-- [ ] Run `mvn spring-boot:run`
-- [ ] Open http://localhost:8090/auth/welcome
-- [ ] See the welcome message
+Si el objetivo del curso es aplicar autorizacion por rol, puedes evolucionar la seguridad asi:
 
----
-
-## License
-
-See [LICENSE](LICENSE)
+1. Definir usuarios/roles (`USER`, `ADMIN`).
+2. Permitir publico solo en `/auth/**` y proteger `/user` y `/admin`.
+3. Activar formulario de login y logout.
+4. Usar `hasRole("USER")` y `hasRole("ADMIN")` en rutas.
 
 ---
 
-**Welcome to the Spring Security course!**
+## Licencia
 
-_Last updated: February 7, 2026_  
-_Version: 3.0 (Simplified)_  
-_Status: Ready to learn_
+Ver `LICENSE`.
