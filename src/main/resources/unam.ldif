@@ -62,6 +62,35 @@ givenName: Carlos
 mail: cmartinez@unam.org
 userPassword: Alumno123
 
+# --- Alumno con SHA-256 (password: Alumno123) ---
+dn: uid=jlopez,ou=usuarios,dc=unam,dc=org
+changetype: add
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+uid: jlopez
+cn: Jorge Lopez
+sn: Lopez
+givenName: Jorge
+mail: jlopez@unam.org
+userPassword: {SHA256}M3bIQSmuFX32xKLcQJIzxOzAjU+hvlXg9N2zafsJPug=
+
+# --- Alumno con BCrypt (password: Alumno123) ---
+dn: uid=pramirez,ou=usuarios,dc=unam,dc=org
+changetype: add
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+uid: pramirez
+cn: Patricia Ramirez
+sn: Ramirez
+givenName: Patricia
+mail: pramirez@unam.org
+userPassword: {CRYPT}$2a$10$Zg1bn3v/rqHqP9cFY1lAB.thqaIYDHidXuidK9dDpbCpneGcv5AYu
+
+
 # ============================================
 # Grupos
 # ============================================
@@ -86,3 +115,5 @@ description: Alumnos inscritos
 member: uid=mgarcia,ou=usuarios,dc=unam,dc=org
 member: uid=lhernandez,ou=usuarios,dc=unam,dc=org
 member: uid=cmartinez,ou=usuarios,dc=unam,dc=org
+member: uid=jlopez,ou=usuarios,dc=unam,dc=org
+member: uid=pramirez,ou=usuarios,dc=unam,dc=org
