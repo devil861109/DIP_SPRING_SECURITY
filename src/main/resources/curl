@@ -1,0 +1,10 @@
+# Todos los usuarios con sus grupos
+curl -u arivero:password http://localhost:8090/admin/api/usuarios
+
+# Uno especifico (404 si no existe)
+curl -u arivero:password http://localhost:8090/admin/api/usuarios/jlopez
+
+# Crear uno nuevo
+curl -u arivero:password -X POST http://localhost:8090/admin/api/usuarios \
+  -H "Content-Type: application/json" \
+  -d '{"uid":"asanchez","nombre":"Ana","apellido":"Sanchez","email":"asanchez@unam.org","password":"Alumno123","grupo":"alumnos"}'

@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.ldap.LdapBindAuthenticationManagerFactory;
 import org.springframework.security.ldap.userdetails.DefaultLdapAuthoritiesPopulator;
+import org.springframework.security.ldap.userdetails.InetOrgPersonContextMapper;
 import org.springframework.security.ldap.userdetails.LdapAuthoritiesPopulator;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -27,6 +28,8 @@ public class SecurityConfiguration {
                         .requestMatchers("/alumnos/**").hasAnyRole("ALUMNOS", "PROFESORES")
                         .anyRequest().authenticated())
                 .formLogin(Customizer.withDefaults())
+                .httpBasic(Customizer.withDefaults())                          // ← permite curl -u y Postman Basic Auth
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/admin/api/**"))   // ← permite el POST sin token
                 .logout(Customizer.withDefaults());
         return http.build();
     }
@@ -66,6 +69,7 @@ public class SecurityConfiguration {
                 new LdapBindAuthenticationManagerFactory(contextSource);
         factory.setUserDnPatterns("uid={0},ou=usuarios");  // relativo a la base
         factory.setLdapAuthoritiesPopulator(authorities);
+        factory.setUserDetailsContextMapper(new InetOrgPersonContextMapper()); //user data
         return factory.createAuthenticationManager();
     }
 }
