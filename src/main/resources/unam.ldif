@@ -1,0 +1,124 @@
+# ============================================
+# Raiz (UnboundID no la crea sola)
+# ============================================
+dn: dc=unam,dc=org
+objectClass: top
+objectClass: domain
+dc: unam
+
+# ============================================
+# Estructura base
+# ============================================
+dn: ou=usuarios,dc=unam,dc=org
+objectClass: top
+objectClass: organizationalUnit
+ou: usuarios
+
+dn: ou=grupos,dc=unam,dc=org
+objectClass: top
+objectClass: organizationalUnit
+ou: grupos
+
+# ============================================
+# Usuarios
+# ============================================
+dn: uid=arivero,ou=usuarios,dc=unam,dc=org
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+uid: arivero
+cn: Alfonso Rivero
+sn: Rivero
+givenName: Alfonso
+mail: devil861109@gmail.com
+userPassword: password
+
+dn: uid=mgarcia,ou=usuarios,dc=unam,dc=org
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+uid: mgarcia
+cn: Maria Garcia
+sn: Garcia
+givenName: Maria
+mail: mgarcia@unam.org
+userPassword: Alumno123
+
+dn: uid=lhernandez,ou=usuarios,dc=unam,dc=org
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+uid: lhernandez
+cn: Luis Hernandez
+sn: Hernandez
+givenName: Luis
+mail: lhernandez@unam.org
+userPassword: Alumno123
+
+dn: uid=cmartinez,ou=usuarios,dc=unam,dc=org
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+uid: cmartinez
+cn: Carlos Martinez
+sn: Martinez
+givenName: Carlos
+mail: cmartinez@unam.org
+userPassword: Alumno123
+
+# --- Alumno con SHA-256 (password: Alumno123) ---
+dn: uid=jlopez,ou=usuarios,dc=unam,dc=org
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+uid: jlopez
+cn: Jorge Lopez
+sn: Lopez
+givenName: Jorge
+mail: jlopez@unam.org
+userPassword: {SHA256}M3bIQSmuFX32xKLcQJIzxOzAjU+hvlXg9N2zafsJPug=
+
+# --- Alumno con BCrypt (password: Alumno123) ---
+dn: uid=pramirez,ou=usuarios,dc=unam,dc=org
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+uid: pramirez
+cn: Patricia Ramirez
+sn: Ramirez
+givenName: Patricia
+mail: pramirez@unam.org
+userPassword: {CRYPT}$2a$10$Zg1bn3v/rqHqP9cFY1lAB.thqaIYDHidXuidK9dDpbCpneGcv5AYu
+
+# ============================================
+# Grupos
+# ============================================
+dn: cn=administradores,ou=grupos,dc=unam,dc=org
+objectClass: top
+objectClass: groupOfNames
+cn: administradores
+member: uid=arivero,ou=usuarios,dc=unam,dc=org
+
+dn: cn=profesores,ou=grupos,dc=unam,dc=org
+objectClass: top
+objectClass: groupOfNames
+cn: profesores
+description: Profesores de la institucion
+member: uid=arivero,ou=usuarios,dc=unam,dc=org
+
+dn: cn=alumnos,ou=grupos,dc=unam,dc=org
+objectClass: top
+objectClass: groupOfNames
+cn: alumnos
+description: Alumnos inscritos
+member: uid=mgarcia,ou=usuarios,dc=unam,dc=org
+member: uid=lhernandez,ou=usuarios,dc=unam,dc=org
+member: uid=cmartinez,ou=usuarios,dc=unam,dc=org
+member: uid=jlopez,ou=usuarios,dc=unam,dc=org
+member: uid=pramirez,ou=usuarios,dc=unam,dc=org
